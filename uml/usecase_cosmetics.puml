@@ -1,0 +1,41 @@
+@startuml
+left to right direction
+skinparam actorStyle awesome
+
+actor "Nhân viên (STAFF)" as Staff
+actor "Quản trị viên (ADMIN)" as Admin
+
+' Admin kế thừa mọi quyền của Staff
+Admin --> Staff 
+
+rectangle "Hệ thống Quản lý Cửa hàng Mỹ phẩm" {
+  usecase "Đăng nhập" as UC1
+  usecase "Xem Dashboard" as UC2
+  usecase "Quản lý Sản phẩm" as UC3
+  usecase "Quản lý Khách hàng" as UC4
+  usecase "Quản lý Danh mục\n(Loại, Hãng, NCC)" as UC5
+  usecase "Bán hàng (Lập hóa đơn)" as UC6
+  usecase "Nhập kho (Import)" as UC7
+  usecase "Xem Thống kê & Báo cáo" as UC8
+  usecase "Kiểm tra tồn kho" as UC9
+  usecase "Cập nhật tồn kho" as UC10
+  usecase "Sao lưu dữ liệu (Backup DB)" as UC11
+}
+
+Staff --> UC1
+Staff --> UC2
+Staff --> UC3
+Staff --> UC4
+Staff --> UC5
+Staff --> UC6
+Staff --> UC7
+
+' Chức năng riêng của Admin
+Admin --> UC8
+Admin --> UC11
+
+' Các luồng ngầm định (include)
+UC6 .> UC9: <<include>>
+UC6 .> UC10: <<include>>
+UC7 .> UC10: <<include>>
+@enduml

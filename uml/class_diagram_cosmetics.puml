@@ -1,0 +1,127 @@
+@startuml
+skinparam classAttributeIconSize 0
+
+package "model.enums" {
+  enum StaffRole {
+    ADMIN
+    STAFF
+  }
+}
+
+package "model.entity" {
+  class Category {
+    - Long id
+    - String name
+  }
+  class Brand {
+    - Long id
+    - String name
+  }
+  class Supplier {
+    - Long id
+    - String name
+    - String phone
+    - String address
+  }
+  class Customer {
+    - Long id
+    - String fullName
+    - String phone
+    - int points
+    - String tier
+  }
+  class Staff {
+    - Long id
+    - String fullName
+    - String username
+    - String password
+    - StaffRole role
+  }
+  class Product {
+    - Long id
+    - String barcode
+    - String name
+    - BigDecimal price
+    - int quantity
+  }
+  class Invoice {
+    - Long id
+    - String invoiceCode
+    - Date invoiceDate
+    - BigDecimal totalAmount
+  }
+  class InvoiceDetail {
+    - Long id
+    - int quantity
+    - BigDecimal price
+  }
+  class ImportReceipt {
+    - Long id
+    - String receiptCode
+    - Date importDate
+    - BigDecimal totalAmount
+  }
+  class ImportReceiptDetail {
+    - Long id
+    - int quantity
+    - BigDecimal importPrice
+  }
+}
+
+package "repository" {
+  interface ProductRepository
+  interface InvoiceRepository
+  interface ImportReceiptRepository
+  interface StatisticsRepository
+}
+
+package "service" {
+  interface ProductService
+  interface InvoiceService
+  interface ImportReceiptService
+  interface StatisticsService
+}
+
+package "controller" {
+  class ProductController
+  class SalesController
+  class ImportController
+  class StatisticsController
+}
+
+package "view" {
+  class MainFrame
+  class ProductManagementPanel
+  class SalesPanel
+  class ImportPanel
+  class StatisticsPanel
+}
+
+' Relationships Entity (Khớp với ERD)
+Category "1" <-- "0..*" Product : category
+Brand "1" <-- "0..*" Product : brand
+Staff "1" <-- "0..*" Invoice : staff
+Customer "1" <-- "0..*" Invoice : customer
+Invoice "1" *-- "1..*" InvoiceDetail : details
+Product "1" <-- "0..*" InvoiceDetail : product
+
+Supplier "1" <-- "0..*" ImportReceipt : supplier
+Staff "1" <-- "0..*" ImportReceipt : staff
+ImportReceipt "1" *-- "1..*" ImportReceiptDetail : details
+Product "1" <-- "0..*" ImportReceiptDetail : product
+
+' Relationships Architecture
+SalesController --> InvoiceService
+ImportController --> ImportReceiptService
+ProductController --> ProductService
+StatisticsController --> StatisticsService
+
+InvoiceService --> InvoiceRepository
+ImportReceiptService --> ImportReceiptRepository
+
+SalesPanel --> SalesController
+ImportPanel --> ImportController
+ProductManagementPanel --> ProductController
+MainFrame --> SalesPanel
+MainFrame --> ImportPanel
+@enduml

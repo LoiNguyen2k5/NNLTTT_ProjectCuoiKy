@@ -1,0 +1,26 @@
+@startuml
+start
+:Mở màn hình Quản lý Sản phẩm;
+:Nhập thông tin SP (Tên, Mã vạch, Giá, SL...);
+:Bấm nút "Thêm Mới";
+if (Dữ liệu có bị bỏ trống không?) then (Có)
+  :Hiển thị lỗi "Vui lòng nhập đủ thông tin";
+  stop
+else (Không)
+  if (Giá và Số lượng >= 0?) then (Đúng)
+    :Gửi yêu cầu kiểm tra Mã vạch (Barcode);
+    if (Mã vạch đã tồn tại trong DB?) then (Có)
+      :Hiển thị lỗi "Mã vạch đã tồn tại";
+      stop
+    else (Không)
+      :Tạo đối tượng Product;
+      :Lưu Product vào Database;
+      :Tải lại bảng danh sách Sản phẩm;
+      :Hiển thị "Thêm thành công";
+    endif
+  else (Sai)
+    :Hiển thị lỗi "Giá/SL phải là số dương";
+  endif
+endif
+stop
+@enduml

@@ -1,0 +1,31 @@
+@startuml
+actor Staff
+participant "ProductPanel" as View
+participant "ProductController" as Controller
+participant "ProductService" as Service
+participant "ProductRepository" as Repo
+database "MySQL" as DB
+
+Staff -> View: Nhập Tên, Giá, Barcode...
+Staff -> View: Bấm "Thêm"
+View -> Controller: addProduct(product)
+Controller -> Service: addProduct(product)
+Service -> Repo: existsByBarcode(barcode)
+Repo -> DB: SELECT COUNT(*) WHERE barcode = ?
+DB --> Repo: Trả về kết quả
+Repo --> Service: boolean (true/false)
+
+alt Barcode chưa tồn tại
+    Service -> Repo: save(product)
+    Repo -> DB: INSERT INTO products...
+    DB --> Repo: OK
+    Repo --> Service: Product đã lưu
+    Service --> Controller: Thành công
+    Controller -> View: Cập nhật lại JTable
+    View --> Staff: Báo thành công
+else Barcode bị trùng
+    Service --> Controller: Ném Exception("Mã vạch đã tồn tại")
+    Controller --> View: Hiển thị JOptionPane lỗi
+    View --> Staff: Yêu cầu nhập lại
+end
+@enduml

@@ -1,0 +1,23 @@
+@startuml
+actor Staff
+participant "ImportPanel" as View
+participant "ImportController" as Controller
+participant "ImportReceiptService" as Service
+database "MySQL (JPA)" as DB
+
+Staff -> View: Chọn SP, Nhập SL & Giá
+Staff -> View: Bấm "Chốt Phiếu Nhập"
+View -> Controller: xử lý nhập kho
+Controller -> Service: processImport(receipt)
+Service -> DB: Bắt đầu Transaction
+Service -> DB: Lưu ImportReceipt (Persist)
+loop Cho từng chi tiết nhập
+    Service -> DB: Lấy thông tin Product hiện tại
+    Service -> DB: Lưu ImportReceiptDetail
+    Service -> DB: Cộng thêm số lượng vào Product (Update)
+end
+Service -> DB: Commit Transaction
+Service --> Controller: Trả về thành công
+Controller --> View: Reset giỏ hàng
+View --> Staff: Hiển thị "Nhập kho thành công"
+@enduml

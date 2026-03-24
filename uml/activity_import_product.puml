@@ -1,0 +1,28 @@
+@startuml
+start
+:Mở màn hình Nhập Kho (ImportPanel);
+:Chọn Nhà cung cấp;
+repeat
+  :Chọn Sản phẩm cần nhập;
+  :Nhập số lượng & Giá nhập;
+  if (Số lượng > 0 & Giá > 0?) then (Đúng)
+    :Thêm vào danh sách chờ nhập;
+    :Tính toán Tổng tiền nhập;
+  else (Sai)
+    :Hiển thị lỗi dữ liệu không hợp lệ;
+  endif
+repeat while (Nhập thêm sản phẩm khác?) is (Có)
+-> Không;
+:Bấm nút CHỐT PHIẾU NHẬP KHO;
+if (Phiếu nhập có dữ liệu?) then (Có)
+  :Tạo đối tượng ImportReceipt;
+  :Lưu phiếu nhập vào Database;
+  :Lưu chi tiết phiếu nhập (ImportReceiptDetail);
+  :TĂNG số lượng tồn kho của Sản phẩm tương ứng;
+  :Hiển thị thông báo "Nhập kho thành công";
+  :Xóa rỗng giỏ hàng nhập;
+else (Không)
+  :Hiển thị lỗi "Phiếu trống";
+endif
+stop
+@enduml

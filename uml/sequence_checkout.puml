@@ -1,0 +1,42 @@
+@startuml
+actor Staff
+participant "SalesPanel" as View
+participant "SalesController" as Controller
+participant "InvoiceService" as Service
+participant "PDFExporter/EmailUtil" as Utils
+database "MySQL (JPA)" as DB
+
+Staff -> View: Nhập thông tin giỏ hàng & Chọn KH
+Staff -> View: Bấm "Thanh toán"
+View -> Controller: processCheckout()
+Controller -> Service: processCheckout(invoice)
+Service -> DB: Bắt đầu Transaction (Begin)
+loop Cho từng sản phẩm trong giỏ
+    Service -> DB: Lấy thông tin Product
+    Service -> DB: Kiểm tra tồn kho (quantity >= số lượng mua)
+end
+alt Tồn kho hợp lệ
+    Service -> DB: Lưu Invoice (Persist)
+    loop
+        Service -> DB: Lưu InvoiceDetail
+        Service -> DB: Trừ số lượng Product (Update quantity)
+    end
+    Service -> DB: Commit Transaction
+    Service --> Controller: Thành công
+    Controller -> Utils: exportInvoice(invoice, "HoaDon.pdf")
+    Utils --> Controller: File PDF đã tạo
+    Controller -> View: Hỏi "Có muốn gửi Email không?"
+    alt Chọn Có
+        Staff -> View: Nhập Email
+        View -> Controller: Gửi Email
+        Controller -> Utils: sendInvoiceAsync(email, pdfFile)
+    end
+    Controller -> View: Mở file PDF lên màn hình
+    View --> Staff: Thông báo hoàn tất giao dịch
+else Tồn kho không đủ (Hoặc lỗi)
+    Service -> DB: Rollback Transaction
+    Service --> Controller: Ném Exception (Lỗi)
+    Controller --> View: Hiển thị lỗi
+    View --> Staff: Báo lỗi thanh toán
+end
+@enduml

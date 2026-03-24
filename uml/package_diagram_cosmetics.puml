@@ -1,0 +1,24 @@
+@startuml
+package "com.example.cosmetic.view" as view {
+}
+package "com.example.cosmetic.controller" as controller {
+}
+package "com.example.cosmetic.service" as service {
+}
+package "com.example.cosmetic.repository" as repository {
+}
+package "com.example.cosmetic.model.entity" as entity {
+}
+package "com.example.cosmetic.utils" as utils {
+}
+package "com.example.cosmetic.config" as config {
+}
+
+view --> controller : "Gửi thao tác người dùng"
+controller --> service : "Gọi xử lý nghiệp vụ"
+service --> repository : "Yêu cầu dữ liệu"
+repository --> entity : "Ánh xạ (JPA Mapping)"
+service --> entity : "Xử lý logic đối tượng"
+controller --> utils : "Gọi xuất PDF/Email/Backup"
+repository --> config : "Lấy EntityManager (JpaUtil)"
+@enduml

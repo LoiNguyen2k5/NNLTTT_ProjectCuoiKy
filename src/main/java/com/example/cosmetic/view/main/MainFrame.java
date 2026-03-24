@@ -18,6 +18,9 @@ import com.example.cosmetic.view.statistics.StatisticsPanel;
 import com.example.cosmetic.controller.*;
 import com.example.cosmetic.view.utils.DatabaseBackupUtil;
 
+import com.formdev.flatlaf.FlatDarkLaf;
+import com.formdev.flatlaf.FlatLightLaf;
+
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
@@ -37,7 +40,6 @@ public class MainFrame extends JFrame {
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
 
-        // Khay chứa các panel chức năng ở giữa màn hình
         centerPanel = new JPanel(new BorderLayout());
         JLabel lblWelcome = new JLabel("CHÀO MỪNG BẠN ĐẾN VỚI HỆ THỐNG (" + currentStaff.getRole() + ")", SwingConstants.CENTER);
         lblWelcome.setFont(new Font("Arial", Font.BOLD, 24));
@@ -85,22 +87,42 @@ public class MainFrame extends JFrame {
         JMenuItem itemStats = new JMenuItem("Xem Thống Kê Báo Cáo");
         menuStats.add(itemStats);
 
-        // 5. Menu Hệ Thống (MỚI THÊM)
+        // 5. Menu Hệ Thống (Admin)
         JMenu menuSystem = new JMenu("Hệ Thống");
         JMenuItem itemBackup = new JMenuItem("Sao lưu dữ liệu (Backup DB)");
         menuSystem.add(itemBackup);
+
+        // 6. Menu Giao Diện (Thanh gạt Dark Mode)
+        JMenu menuView = new JMenu("Giao Diện");
+        JCheckBoxMenuItem itemDarkMode = new JCheckBoxMenuItem("Chế độ Tối (Dark Mode)");
+        
+        // Bắt sự kiện click vào nút Dark Mode
+        itemDarkMode.addActionListener(e -> {
+            try {
+                if (itemDarkMode.isSelected()) {
+                    UIManager.setLookAndFeel(new FlatDarkLaf());
+                } else {
+                    UIManager.setLookAndFeel(new FlatLightLaf());
+                }
+                // Cập nhật lại giao diện ngay lập tức
+                SwingUtilities.updateComponentTreeUI(this);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        });
+        menuView.add(itemDarkMode);
 
         // Thêm các Menu chính vào MenuBar
         menuBar.add(menuSales);
         menuBar.add(menuKho);
         menuBar.add(menuCatalog);
         menuBar.add(menuStats);
+        menuBar.add(menuView); // Menu giao diện ai cũng thấy được
 
-        // Phân quyền: Nhân viên thường (STAFF) không được xem Thống Kê và Hệ Thống
+        // Phân quyền
         if (currentStaff.getRole() == StaffRole.STAFF) {
             menuStats.setVisible(false);
         } else {
-            // Chỉ Admin mới thấy menu Hệ thống
             menuBar.add(menuSystem);
         }
 
@@ -120,8 +142,6 @@ public class MainFrame extends JFrame {
         itemProduct.addActionListener(e -> openProductManagement());
         
         itemStats.addActionListener(e -> openStatistics());
-        
-        // Gắn sự kiện Backup
         itemBackup.addActionListener(e -> performDatabaseBackup());
     }
 
@@ -150,7 +170,7 @@ public class MainFrame extends JFrame {
             new SalesController(view, pService, cService, iService, currentStaff);
             switchPanel(view);
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Lỗi khi mở màn hình bán hàng: " + e.getMessage());
+            JOptionPane.showMessageDialog(this, "Lỗi: " + e.getMessage());
         }
     }
 
@@ -176,7 +196,7 @@ public class MainFrame extends JFrame {
             new ImportController(view, pService, sService, iService, currentStaff);
             switchPanel(view);
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Lỗi khi mở màn hình nhập kho: " + e.getMessage());
+            JOptionPane.showMessageDialog(this, "Lỗi: " + e.getMessage());
         }
     }
 
@@ -259,9 +279,8 @@ public class MainFrame extends JFrame {
             File fileToSave = fileChooser.getSelectedFile();
             String savePath = fileToSave.getAbsolutePath();
 
-            // LƯU Ý: Thay đổi password MySQL của bạn ở đây (Nếu dùng XAMPP mặc định không có pass thì để "")
             String dbUser = "root"; 
-            String dbPass = "12345"; 
+            String dbPass = "12345"; // Đổi thành mật khẩu MySQL của bạn
             String dbName = "cosmetics_management";
 
             boolean success = DatabaseBackupUtil.backup(dbUser, dbPass, dbName, savePath);

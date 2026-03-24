@@ -1,0 +1,29 @@
+@startuml
+start
+:Mở màn hình Bán hàng (SalesPanel);
+:Chọn Khách hàng từ danh sách;
+repeat
+  :Chọn Sản phẩm;
+  :Nhập số lượng;
+  if (Số lượng > 0 & Tồn kho đủ?) then (Đúng)
+    :Thêm sản phẩm vào Giỏ hàng;
+    :Tính toán lại Tổng tiền;
+  else (Sai)
+    :Hiển thị cảnh báo (Không hợp lệ/Hết hàng);
+  endif
+repeat while (Khách muốn mua thêm?) is (Có)
+-> Không;
+:Bấm nút THANH TOÁN;
+if (Giỏ hàng có SP & Đã chọn KH?) then (Hợp lệ)
+  :Tạo đối tượng Invoice (Hóa đơn);
+  :Tạo các đối tượng InvoiceDetail;
+  :Lưu vào Database (Commit);
+  :Giảm số lượng tồn kho của Sản phẩm;
+  :Xuất file Báo cáo Hóa đơn (PDF);
+  :Hỏi ý kiến Gửi Email cho khách;
+  :Hiển thị thông báo Thành công & Mở file PDF;
+else (Không hợp lệ)
+  :Hiển thị lỗi (Giỏ hàng trống);
+endif
+stop
+@enduml
