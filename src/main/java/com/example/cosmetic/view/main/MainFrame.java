@@ -16,9 +16,13 @@ import com.example.cosmetic.view.invoice.ImportPanel;
 import com.example.cosmetic.view.invoice.ImportHistoryPanel;
 import com.example.cosmetic.view.statistics.StatisticsPanel;
 import com.example.cosmetic.controller.*;
+import com.example.cosmetic.view.utils.DatabaseBackupUtil;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.File;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class MainFrame extends JFrame {
     private Staff currentStaff;
@@ -36,7 +40,8 @@ public class MainFrame extends JFrame {
         // Khay chứa các panel chức năng ở giữa màn hình
         centerPanel = new JPanel(new BorderLayout());
         JLabel lblWelcome = new JLabel("CHÀO MỪNG BẠN ĐẾN VỚI HỆ THỐNG (" + currentStaff.getRole() + ")", SwingConstants.CENTER);
-        lblWelcome.setFont(new Font("Arial", Font.BOLD, 20));
+        lblWelcome.setFont(new Font("Arial", Font.BOLD, 24));
+        lblWelcome.setForeground(new Color(50, 150, 250));
         centerPanel.add(lblWelcome, BorderLayout.CENTER);
 
         add(centerPanel, BorderLayout.CENTER);
@@ -53,7 +58,7 @@ public class MainFrame extends JFrame {
         menuSales.add(itemSales);
         menuSales.add(itemInvoiceHistory);
         
-        // 2. Menu Quản Lý Kho (Nhập hàng)
+        // 2. Menu Quản Lý Kho
         JMenu menuKho = new JMenu("Quản Lý Kho");
         JMenuItem itemImport = new JMenuItem("Nhập Kho (Import)");
         JMenuItem itemImportHistory = new JMenuItem("Lịch Sử Nhập Kho");
@@ -80,20 +85,28 @@ public class MainFrame extends JFrame {
         JMenuItem itemStats = new JMenuItem("Xem Thống Kê Báo Cáo");
         menuStats.add(itemStats);
 
+        // 5. Menu Hệ Thống (MỚI THÊM)
+        JMenu menuSystem = new JMenu("Hệ Thống");
+        JMenuItem itemBackup = new JMenuItem("Sao lưu dữ liệu (Backup DB)");
+        menuSystem.add(itemBackup);
+
         // Thêm các Menu chính vào MenuBar
         menuBar.add(menuSales);
         menuBar.add(menuKho);
         menuBar.add(menuCatalog);
         menuBar.add(menuStats);
 
-        // Phân quyền: Nhân viên thường (STAFF) không được xem Thống Kê
+        // Phân quyền: Nhân viên thường (STAFF) không được xem Thống Kê và Hệ Thống
         if (currentStaff.getRole() == StaffRole.STAFF) {
             menuStats.setVisible(false);
+        } else {
+            // Chỉ Admin mới thấy menu Hệ thống
+            menuBar.add(menuSystem);
         }
 
         setJMenuBar(menuBar);
 
-        // --- Gắn sự kiện click mở Panel cho từng Menu Item ---
+        // --- Gắn sự kiện click mở Panel ---
         itemSales.addActionListener(e -> openSales());
         itemInvoiceHistory.addActionListener(e -> openInvoiceHistory());
         
@@ -107,9 +120,11 @@ public class MainFrame extends JFrame {
         itemProduct.addActionListener(e -> openProductManagement());
         
         itemStats.addActionListener(e -> openStatistics());
+        
+        // Gắn sự kiện Backup
+        itemBackup.addActionListener(e -> performDatabaseBackup());
     }
 
-    // Hàm tiện ích để đổi giao diện trên màn hình chính
     private void switchPanel(JPanel newPanel) {
         centerPanel.removeAll();
         centerPanel.add(newPanel, BorderLayout.CENTER);
@@ -118,7 +133,7 @@ public class MainFrame extends JFrame {
     }
 
     // =========================================================
-    // CÁC HÀM KHỞI TẠO CONTROLLER VÀ VIEW CHO TỪNG MODULE
+    // CÁC HÀM MỞ GIAO DIỆN CHỨC NĂNG
     // =========================================================
 
     private void openSales() {
@@ -225,5 +240,41 @@ public class MainFrame extends JFrame {
         StatisticsPanel view = new StatisticsPanel();
         new StatisticsController(service, view);
         switchPanel(view);
+    }
+
+    // =========================================================
+    // HÀM XỬ LÝ SAO LƯU DỮ LIỆU (BACKUP)
+    // =========================================================
+    private void performDatabaseBackup() {
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setDialogTitle("Chọn nơi lưu file Backup Database");
+        
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss");
+        String defaultFileName = "Cosmetic_Backup_" + sdf.format(new Date()) + ".sql";
+        fileChooser.setSelectedFile(new File(defaultFileName));
+
+        int userSelection = fileChooser.showSaveDialog(this);
+
+        if (userSelection == JFileChooser.APPROVE_OPTION) {
+            File fileToSave = fileChooser.getSelectedFile();
+            String savePath = fileToSave.getAbsolutePath();
+
+            // LƯU Ý: Thay đổi password MySQL của bạn ở đây (Nếu dùng XAMPP mặc định không có pass thì để "")
+            String dbUser = "root"; 
+            String dbPass = "12345"; 
+            String dbName = "cosmetics_management";
+
+            boolean success = DatabaseBackupUtil.backup(dbUser, dbPass, dbName, savePath);
+
+            if (success) {
+                JOptionPane.showMessageDialog(this, 
+                    "Tuyệt vời! Đã sao lưu toàn bộ dữ liệu thành công tại:\n" + savePath, 
+                    "Thành công", JOptionPane.INFORMATION_MESSAGE);
+            } else {
+                JOptionPane.showMessageDialog(this, 
+                    "Lỗi sao lưu! \nNguyên nhân thường gặp: Máy tính chưa được cấu hình biến môi trường PATH cho thư mục 'bin' của MySQL.", 
+                    "Lỗi Backup", JOptionPane.ERROR_MESSAGE);
+            }
+        }
     }
 }

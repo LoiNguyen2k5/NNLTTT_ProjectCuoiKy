@@ -3,7 +3,8 @@ package com.example.cosmetic.controller;
 import com.example.cosmetic.model.entity.*;
 import com.example.cosmetic.service.*;
 import com.example.cosmetic.view.invoice.SalesPanel;
-import com.example.cosmetic.view.utils.PDFExporter; // Gọi công cụ xuất PDF
+import com.example.cosmetic.view.utils.PDFExporter; 
+import com.example.cosmetic.view.utils.EmailUtil; // Gọi công cụ gửi Email
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -61,13 +62,12 @@ public class SalesController {
         DefaultTableModel model = view.getCartModel();
         boolean exists = false;
         
-        // Bảng có 6 cột: [0] ID, [1] Barcode, [2] Tên, [3] Số lượng, [4] Đơn giá, [5] Tổng tiền
         for (int i = 0; i < model.getRowCount(); i++) {
             if (model.getValueAt(i, 0).equals(selectedProd.getId())) {
-                int oldQty = (int) model.getValueAt(i, 3); // Lấy Số lượng cũ
+                int oldQty = (int) model.getValueAt(i, 3);
                 int newQty = oldQty + qty;
-                model.setValueAt(newQty, i, 3); // Cập nhật Số lượng mới
-                model.setValueAt(selectedProd.getPrice().multiply(new BigDecimal(newQty)), i, 5); // Cập nhật Tổng tiền
+                model.setValueAt(newQty, i, 3); 
+                model.setValueAt(selectedProd.getPrice().multiply(new BigDecimal(newQty)), i, 5); 
                 exists = true;
                 break;
             }
@@ -93,7 +93,6 @@ public class SalesController {
             grandTotal = grandTotal.add((BigDecimal) view.getCartModel().getValueAt(i, 5));
         }
         
-        // Hiển thị số tiền đẹp mắt có dấu phẩy (VD: 2,500,000)
         DecimalFormat df = new DecimalFormat("#,###");
         view.getTxtTotal().setText(df.format(grandTotal));
     }
@@ -115,7 +114,6 @@ public class SalesController {
             invoice.setStaff(currentStaff);
             invoice.setCustomer(selectedCustomer);
 
-            // Tính lại tổng tiền thô (raw) để lưu DB, tránh lỗi khi parse chuỗi có dấu phẩy
             BigDecimal finalTotal = BigDecimal.ZERO;
             List<InvoiceDetail> details = new ArrayList<>();
             
@@ -136,27 +134,45 @@ public class SalesController {
             invoice.setTotalAmount(finalTotal);
             invoice.setDetails(details);
 
-            // GỌI SERVICE LƯU HÓA ĐƠN & TRỪ KHO
+            // 1. GỌI SERVICE LƯU HÓA ĐƠN & TRỪ KHO
             invoiceService.processCheckout(invoice);
             
-            // XUẤT FILE PDF
+            // 2. XUẤT FILE PDF
             String pdfFileName = "HoaDon_" + invoice.getInvoiceCode() + ".pdf";
             PDFExporter.exportInvoice(invoice, pdfFileName);
-            
-            JOptionPane.showMessageDialog(view, "Thanh toán thành công!\nĐã lưu hóa đơn: " + pdfFileName);
-            
-            // Tự động mở file PDF vừa tạo
+
+            // 3. TÍNH NĂNG GỬI EMAIL
+            int confirmEmail = JOptionPane.showConfirmDialog(view, 
+                "Thanh toán thành công!\nBạn có muốn gửi hóa đơn này qua Email cho khách hàng không?", 
+                "Gửi Email Hóa Đơn", JOptionPane.YES_NO_OPTION);
+                
+            if (confirmEmail == JOptionPane.YES_OPTION) {
+                String email = JOptionPane.showInputDialog(view, "Nhập địa chỉ Email của khách hàng:");
+                if (email != null && !email.trim().isEmpty() && email.contains("@")) {
+                    String cusName = selectedCustomer.getFullName();
+                    // Gọi hàm gửi mail chạy ngầm
+                    EmailUtil.sendInvoiceAsync(email, cusName, pdfFileName);
+                    JOptionPane.showMessageDialog(view, "Đang gửi email trong nền. Giao dịch hoàn tất!");
+                } else {
+                    JOptionPane.showMessageDialog(view, "Email không hợp lệ, đã bỏ qua bước gửi mail.", "Cảnh báo", JOptionPane.WARNING_MESSAGE);
+                }
+            } else {
+                JOptionPane.showMessageDialog(view, "Đã lưu hóa đơn: " + pdfFileName);
+            }
+
+            // 4. TỰ ĐỘNG MỞ FILE PDF VỪA TẠO
             try {
                 Desktop.getDesktop().open(new File(pdfFileName));
             } catch (Exception ex) {
-                System.out.println("Không thể tự động mở file PDF, vui lòng mở thủ công.");
+                System.out.println("Không thể tự động mở file PDF.");
             }
 
-            // Làm sạch giỏ hàng sau khi thanh toán xong
+            // 5. LÀM SẠCH GIỎ HÀNG SAU KHI XONG
             view.getCartModel().setRowCount(0);
             view.getTxtTotal().setText("0");
 
         } catch (Exception ex) {
+            ex.printStackTrace();
             JOptionPane.showMessageDialog(view, "Lỗi thanh toán: " + ex.getMessage());
         }
     }
