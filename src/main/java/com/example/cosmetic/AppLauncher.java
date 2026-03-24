@@ -4,6 +4,7 @@ import com.example.cosmetic.controller.AuthController;
 import com.example.cosmetic.repository.impl.StaffRepositoryImpl;
 import com.example.cosmetic.service.impl.AuthServiceImpl;
 import com.example.cosmetic.view.auth.LoginFrame;
+import com.formdev.flatlaf.FlatDarkLaf;
 
 import javax.swing.SwingUtilities;
 

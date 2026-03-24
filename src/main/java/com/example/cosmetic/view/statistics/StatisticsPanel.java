@@ -7,28 +7,25 @@ public class StatisticsPanel extends JPanel {
     private JLabel lblTotalCustomers, lblOutOfStock, lblTodayRevenue, lblTotalRevenue;
     private JTable tableTopSelling;
     private DefaultTableModel tableModel;
-    private JButton btnRefresh;
+    private JButton btnRefresh, btnExportPDF; // Khai báo thêm nút xuất PDF
     private JPanel pnlChart; 
 
     public StatisticsPanel() {
         setLayout(new BorderLayout(10, 10));
 
-        // 1. Dashboard 4 Ô vuông (Chia lưới 1 hàng 4 cột)
         JPanel pnlDashboard = new JPanel(new GridLayout(1, 4, 10, 10));
         pnlDashboard.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
         lblTotalCustomers = createDashboardBox("Tổng Khách", pnlDashboard, new Color(100, 200, 255));
         lblOutOfStock = createDashboardBox("SP Hết Hàng", pnlDashboard, new Color(255, 100, 100));
         lblTodayRevenue = createDashboardBox("Doanh Thu Hôm Nay", pnlDashboard, new Color(100, 255, 100));
-        lblTotalRevenue = createDashboardBox("TỔNG DOANH THU", pnlDashboard, new Color(255, 200, 100)); // Ô vuông mới
+        lblTotalRevenue = createDashboardBox("TỔNG DOANH THU", pnlDashboard, new Color(255, 200, 100)); 
         add(pnlDashboard, BorderLayout.NORTH);
 
-        // 2. Khu vực giữa
         JPanel pnlCenter = new JPanel(new GridLayout(1, 2, 10, 0));
         
         JPanel pnlTable = new JPanel(new BorderLayout());
         pnlTable.setBorder(BorderFactory.createTitledBorder("Top 10 Bán Chạy Nhất"));
-        // Cập nhật tên cột
         tableModel = new DefaultTableModel(new String[]{"Tên Sản Phẩm", "Đã Bán", "Doanh Thu", "Ngày Bán Gần Nhất"}, 0);
         tableTopSelling = new JTable(tableModel);
         pnlTable.add(new JScrollPane(tableTopSelling), BorderLayout.CENTER);
@@ -40,9 +37,17 @@ public class StatisticsPanel extends JPanel {
         pnlCenter.add(pnlChart);
         add(pnlCenter, BorderLayout.CENTER);
 
-        // 3. Nút Làm mới
-        JPanel pnlBottom = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        // --- KHU VỰC NÚT BẤM (Cập nhật) ---
+        JPanel pnlBottom = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 5));
+        
+        btnExportPDF = new JButton("Xuất Báo Cáo PDF");
+        btnExportPDF.setBackground(new Color(220, 53, 69)); // Màu đỏ nổi bật
+        btnExportPDF.setForeground(Color.WHITE);
+        btnExportPDF.setFont(new Font("Arial", Font.BOLD, 14));
+        
         btnRefresh = new JButton("Làm mới thống kê");
+        
+        pnlBottom.add(btnExportPDF);
         pnlBottom.add(btnRefresh);
         add(pnlBottom, BorderLayout.SOUTH);
     }
@@ -72,5 +77,6 @@ public class StatisticsPanel extends JPanel {
     public JLabel getLblTotalRevenue() { return lblTotalRevenue; }
     public DefaultTableModel getTableModel() { return tableModel; }
     public JButton getBtnRefresh() { return btnRefresh; }
+    public JButton getBtnExportPDF() { return btnExportPDF; } // Getter mới
     public JPanel getPnlChart() { return pnlChart; } 
 }
