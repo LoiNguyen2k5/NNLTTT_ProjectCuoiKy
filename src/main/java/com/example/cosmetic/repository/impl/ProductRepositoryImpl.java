@@ -12,6 +12,7 @@ public class ProductRepositoryImpl implements ProductRepository {
     public List<Product> findAll() {
         EntityManager em = JpaUtil.getEntityManager();
         try {
+            // JOIN FETCH giúp lấy kèm Category và Brand để hiển thị lên bảng ngay lập tức
             return em.createQuery("SELECT p FROM Product p JOIN FETCH p.category JOIN FETCH p.brand", Product.class).getResultList();
         } finally { em.close(); }
     }
@@ -20,21 +21,34 @@ public class ProductRepositoryImpl implements ProductRepository {
     public void save(Product p) {
         EntityManager em = JpaUtil.getEntityManager();
         EntityTransaction tx = em.getTransaction();
-        try { tx.begin(); em.persist(p); tx.commit(); } catch (Exception e) { tx.rollback(); throw e; } finally { em.close(); }
+        try { tx.begin(); em.persist(p); tx.commit(); } 
+        catch (Exception e) { if (tx.isActive()) tx.rollback(); throw e; } 
+        finally { em.close(); }
     }
 
     @Override
     public void update(Product p) {
         EntityManager em = JpaUtil.getEntityManager();
         EntityTransaction tx = em.getTransaction();
-        try { tx.begin(); em.merge(p); tx.commit(); } catch (Exception e) { tx.rollback(); throw e; } finally { em.close(); }
+        try { 
+            tx.begin(); 
+            em.merge(p); // Lệnh merge dùng để cập nhật khi đối tượng p đã có ID
+            tx.commit(); 
+        } catch (Exception e) { if (tx.isActive()) tx.rollback(); throw e; } 
+        finally { em.close(); }
     }
 
     @Override
     public void delete(Long id) {
         EntityManager em = JpaUtil.getEntityManager();
         EntityTransaction tx = em.getTransaction();
-        try { tx.begin(); Product p = em.find(Product.class, id); if (p != null) em.remove(p); tx.commit(); } catch (Exception e) { tx.rollback(); throw e; } finally { em.close(); }
+        try { 
+            tx.begin(); 
+            Product p = em.find(Product.class, id); 
+            if (p != null) em.remove(p); 
+            tx.commit(); 
+        } catch (Exception e) { if (tx.isActive()) tx.rollback(); throw e; } 
+        finally { em.close(); }
     }
 
     @Override

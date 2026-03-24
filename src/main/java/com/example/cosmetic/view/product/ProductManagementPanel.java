@@ -53,4 +53,5 @@ public class ProductManagementPanel extends JPanel {
     public JButton getBtnDelete() { return btnDelete; }
     public JTable getTable() { return table; }
     public DefaultTableModel getTableModel() { return tableModel; }
+    public JButton getBtnClear() { return btnClear; }
 }
