@@ -12,6 +12,9 @@ import com.example.cosmetic.view.product.ProductManagementPanel;
 import com.example.cosmetic.view.customer.CustomerManagementPanel;
 import com.example.cosmetic.view.invoice.SalesPanel;
 import com.example.cosmetic.view.invoice.InvoiceManagementPanel;
+import com.example.cosmetic.view.invoice.ImportPanel;
+import com.example.cosmetic.view.invoice.ImportHistoryPanel;
+import com.example.cosmetic.view.statistics.StatisticsPanel;
 import com.example.cosmetic.controller.*;
 
 import javax.swing.*;
@@ -30,6 +33,7 @@ public class MainFrame extends JFrame {
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
 
+        // Khay chứa các panel chức năng ở giữa màn hình
         centerPanel = new JPanel(new BorderLayout());
         JLabel lblWelcome = new JLabel("CHÀO MỪNG BẠN ĐẾN VỚI HỆ THỐNG (" + currentStaff.getRole() + ")", SwingConstants.CENTER);
         lblWelcome.setFont(new Font("Arial", Font.BOLD, 20));
@@ -42,15 +46,22 @@ public class MainFrame extends JFrame {
     private void setupMenuBasedOnRole() {
         JMenuBar menuBar = new JMenuBar();
         
+        // 1. Menu Bán Hàng
         JMenu menuSales = new JMenu("Bán Hàng");
         JMenuItem itemSales = new JMenuItem("Lập Hóa Đơn");
         JMenuItem itemInvoiceHistory = new JMenuItem("Lịch Sử Hóa Đơn");
         menuSales.add(itemSales);
         menuSales.add(itemInvoiceHistory);
         
-        JMenu menuCatalog = new JMenu("Danh Mục");
-        JMenu menuStats = new JMenu("Thống Kê");
+        // 2. Menu Quản Lý Kho (Nhập hàng)
+        JMenu menuKho = new JMenu("Quản Lý Kho");
+        JMenuItem itemImport = new JMenuItem("Nhập Kho (Import)");
+        JMenuItem itemImportHistory = new JMenuItem("Lịch Sử Nhập Kho");
+        menuKho.add(itemImport);
+        menuKho.add(itemImportHistory);
 
+        // 3. Menu Danh Mục
+        JMenu menuCatalog = new JMenu("Danh Mục");
         JMenuItem itemCategory = new JMenuItem("Loại Mỹ Phẩm");
         JMenuItem itemBrand = new JMenuItem("Thương Hiệu");
         JMenuItem itemSupplier = new JMenuItem("Nhà Cung Cấp");
@@ -64,25 +75,41 @@ public class MainFrame extends JFrame {
         menuCatalog.addSeparator(); 
         menuCatalog.add(itemProduct);
 
+        // 4. Menu Thống Kê
+        JMenu menuStats = new JMenu("Thống Kê");
+        JMenuItem itemStats = new JMenuItem("Xem Thống Kê Báo Cáo");
+        menuStats.add(itemStats);
+
+        // Thêm các Menu chính vào MenuBar
         menuBar.add(menuSales);
+        menuBar.add(menuKho);
         menuBar.add(menuCatalog);
         menuBar.add(menuStats);
 
+        // Phân quyền: Nhân viên thường (STAFF) không được xem Thống Kê
         if (currentStaff.getRole() == StaffRole.STAFF) {
             menuStats.setVisible(false);
         }
 
         setJMenuBar(menuBar);
 
+        // --- Gắn sự kiện click mở Panel cho từng Menu Item ---
         itemSales.addActionListener(e -> openSales());
         itemInvoiceHistory.addActionListener(e -> openInvoiceHistory());
+        
+        itemImport.addActionListener(e -> openImportPanel());
+        itemImportHistory.addActionListener(e -> openImportHistoryPanel());
+        
         itemCategory.addActionListener(e -> openCategoryManagement());
         itemBrand.addActionListener(e -> openBrandManagement());
         itemSupplier.addActionListener(e -> openSupplierManagement());
         itemCustomer.addActionListener(e -> openCustomerManagement());
         itemProduct.addActionListener(e -> openProductManagement());
+        
+        itemStats.addActionListener(e -> openStatistics());
     }
 
+    // Hàm tiện ích để đổi giao diện trên màn hình chính
     private void switchPanel(JPanel newPanel) {
         centerPanel.removeAll();
         centerPanel.add(newPanel, BorderLayout.CENTER);
@@ -90,11 +117,16 @@ public class MainFrame extends JFrame {
         centerPanel.repaint();
     }
 
+    // =========================================================
+    // CÁC HÀM KHỞI TẠO CONTROLLER VÀ VIEW CHO TỪNG MODULE
+    // =========================================================
+
     private void openSales() {
         try {
             ProductRepositoryImpl pRepo = new ProductRepositoryImpl();
             CustomerRepositoryImpl cRepo = new CustomerRepositoryImpl();
             InvoiceRepositoryImpl iRepo = new InvoiceRepositoryImpl();
+            
             ProductServiceImpl pService = new ProductServiceImpl(pRepo);
             CustomerServiceImpl cService = new CustomerServiceImpl(cRepo);
             InvoiceServiceImpl iService = new InvoiceServiceImpl(iRepo);
@@ -112,6 +144,32 @@ public class MainFrame extends JFrame {
         InvoiceServiceImpl service = new InvoiceServiceImpl(repo);
         InvoiceManagementPanel view = new InvoiceManagementPanel();
         new InvoiceController(service, view);
+        switchPanel(view);
+    }
+
+    private void openImportPanel() {
+        try {
+            ProductRepositoryImpl pRepo = new ProductRepositoryImpl();
+            SupplierRepositoryImpl sRepo = new SupplierRepositoryImpl();
+            ImportReceiptRepositoryImpl iRepo = new ImportReceiptRepositoryImpl();
+            
+            ProductServiceImpl pService = new ProductServiceImpl(pRepo);
+            SupplierServiceImpl sService = new SupplierServiceImpl(sRepo);
+            ImportReceiptServiceImpl iService = new ImportReceiptServiceImpl(iRepo);
+            
+            ImportPanel view = new ImportPanel();
+            new ImportController(view, pService, sService, iService, currentStaff);
+            switchPanel(view);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Lỗi khi mở màn hình nhập kho: " + e.getMessage());
+        }
+    }
+
+    private void openImportHistoryPanel() {
+        ImportReceiptRepositoryImpl repo = new ImportReceiptRepositoryImpl();
+        ImportReceiptServiceImpl service = new ImportReceiptServiceImpl(repo);
+        ImportHistoryPanel view = new ImportHistoryPanel();
+        new ImportHistoryController(service, view);
         switchPanel(view);
     }
 
@@ -151,11 +209,21 @@ public class MainFrame extends JFrame {
         ProductRepositoryImpl productRepo = new ProductRepositoryImpl();
         CategoryRepositoryImpl categoryRepo = new CategoryRepositoryImpl();
         BrandRepositoryImpl brandRepo = new BrandRepositoryImpl();
+        
         ProductServiceImpl productService = new ProductServiceImpl(productRepo);
         CategoryServiceImpl categoryService = new CategoryServiceImpl(categoryRepo);
         BrandServiceImpl brandService = new BrandServiceImpl(brandRepo);
+        
         ProductManagementPanel view = new ProductManagementPanel();
         new ProductController(productService, categoryService, brandService, view, currentStaff);
+        switchPanel(view);
+    }
+
+    private void openStatistics() {
+        StatisticsRepositoryImpl repo = new StatisticsRepositoryImpl();
+        StatisticsServiceImpl service = new StatisticsServiceImpl(repo);
+        StatisticsPanel view = new StatisticsPanel();
+        new StatisticsController(service, view);
         switchPanel(view);
     }
 }
