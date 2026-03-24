@@ -18,7 +18,7 @@ import java.awt.*;
 
 public class MainFrame extends JFrame {
     private Staff currentStaff;
-    private JPanel centerPanel; // Khay chứa trung tâm để tráo đổi các Panel
+    private JPanel centerPanel; 
 
     public MainFrame(Staff currentStaff) {
         this.currentStaff = currentStaff;
@@ -29,15 +29,12 @@ public class MainFrame extends JFrame {
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
 
-        // Khởi tạo khay chứa trung tâm với câu chào mừng
         centerPanel = new JPanel(new BorderLayout());
         JLabel lblWelcome = new JLabel("CHÀO MỪNG BẠN ĐẾN VỚI HỆ THỐNG (" + currentStaff.getRole() + ")", SwingConstants.CENTER);
         lblWelcome.setFont(new Font("Arial", Font.BOLD, 20));
         centerPanel.add(lblWelcome, BorderLayout.CENTER);
 
-        // Gắn khay chứa vào chính giữa MainFrame
         add(centerPanel, BorderLayout.CENTER);
-
         setupMenuBasedOnRole();
     }
 
@@ -51,38 +48,36 @@ public class MainFrame extends JFrame {
         JMenu menuCatalog = new JMenu("Danh Mục");
         JMenu menuStats = new JMenu("Thống Kê");
 
-        // --- Tạo các Menu Con (Item) ---
         JMenuItem itemCategory = new JMenuItem("Loại Mỹ Phẩm");
         JMenuItem itemBrand = new JMenuItem("Thương Hiệu");
         JMenuItem itemSupplier = new JMenuItem("Nhà Cung Cấp");
         JMenuItem itemCustomer = new JMenuItem("Khách Hàng");
         JMenuItem itemProduct = new JMenuItem("Sản Phẩm");
 
-        // Nhét Menu Con vào Menu Cha "Danh Mục"
         menuCatalog.add(itemCategory);
         menuCatalog.add(itemBrand);
         menuCatalog.add(itemSupplier);
-        menuCatalog.add(itemCustomer); // Bổ sung Khách hàng
-        menuCatalog.addSeparator(); // Đường kẻ ngang phân cách
+        menuCatalog.add(itemCustomer); 
+        menuCatalog.addSeparator(); 
         menuCatalog.add(itemProduct);
 
         menuBar.add(menuSales);
         menuBar.add(menuCatalog);
         menuBar.add(menuStats);
 
-        // Phân quyền: Nếu là nhân viên thường, ẩn tab Thống Kê đi
+        // Phân quyền: Nhân viên thường không xem được Thống Kê
         if (currentStaff.getRole() == StaffRole.STAFF) {
             menuStats.setVisible(false);
         }
 
         setJMenuBar(menuBar);
 
-        // --- GẮN SỰ KIỆN CLICK CHUYỂN TRANG CHO MENU ---
+        // --- Gắn sự kiện click chuyển trang ---
         itemSales.addActionListener(e -> openSales());
         itemCategory.addActionListener(e -> openCategoryManagement());
         itemBrand.addActionListener(e -> openBrandManagement());
         itemSupplier.addActionListener(e -> openSupplierManagement());
-       // itemCustomer.addActionListener(e -> openCustomerManagement());
+        itemCustomer.addActionListener(e -> openCustomerManagement());
         itemProduct.addActionListener(e -> openProductManagement());
     }
 
@@ -101,22 +96,17 @@ public class MainFrame extends JFrame {
             
             switchPanel(view);
         } catch (Exception e) {
-            e.printStackTrace();
             JOptionPane.showMessageDialog(this, "Lỗi khi mở màn hình bán hàng: " + e.getMessage());
         }
     }
 
-    // Hàm tiện ích: Xóa ruột cũ, thay ruột mới và vẽ lại màn hình
+    // Hàm tiện ích: Xóa giao diện cũ, nhét giao diện mới vào giữa màn hình
     private void switchPanel(JPanel newPanel) {
         centerPanel.removeAll();
         centerPanel.add(newPanel, BorderLayout.CENTER);
         centerPanel.revalidate();
         centerPanel.repaint();
     }
-
-    // =======================================================
-    // CÁC HÀM KHỞI TẠO MVC CHO TỪNG MODULE
-    // =======================================================
 
     private void openCategoryManagement() {
         CategoryRepositoryImpl repo = new CategoryRepositoryImpl();
@@ -142,7 +132,13 @@ public class MainFrame extends JFrame {
         switchPanel(view);
     }
     
-  
+    private void openCustomerManagement() {
+        CustomerRepositoryImpl repo = new CustomerRepositoryImpl();
+        CustomerServiceImpl service = new CustomerServiceImpl(repo);
+        CustomerManagementPanel view = new CustomerManagementPanel();
+        new CustomerController(service, view, currentStaff);
+        switchPanel(view);
+    }
  
     private void openProductManagement() {
         ProductRepositoryImpl productRepo = new ProductRepositoryImpl();
@@ -154,7 +150,6 @@ public class MainFrame extends JFrame {
         BrandServiceImpl brandService = new BrandServiceImpl(brandRepo);
         
         ProductManagementPanel view = new ProductManagementPanel();
-        
         new ProductController(productService, categoryService, brandService, view, currentStaff);
         switchPanel(view);
     }
