@@ -11,6 +11,7 @@ import com.example.cosmetic.view.supplier.SupplierManagementPanel;
 import com.example.cosmetic.view.product.ProductManagementPanel;
 import com.example.cosmetic.view.customer.CustomerManagementPanel;
 import com.example.cosmetic.view.invoice.SalesPanel;
+import com.example.cosmetic.view.invoice.InvoiceManagementPanel;
 import com.example.cosmetic.controller.*;
 
 import javax.swing.*;
@@ -43,7 +44,9 @@ public class MainFrame extends JFrame {
         
         JMenu menuSales = new JMenu("Bán Hàng");
         JMenuItem itemSales = new JMenuItem("Lập Hóa Đơn");
+        JMenuItem itemInvoiceHistory = new JMenuItem("Lịch Sử Hóa Đơn");
         menuSales.add(itemSales);
+        menuSales.add(itemInvoiceHistory);
         
         JMenu menuCatalog = new JMenu("Danh Mục");
         JMenu menuStats = new JMenu("Thống Kê");
@@ -65,15 +68,14 @@ public class MainFrame extends JFrame {
         menuBar.add(menuCatalog);
         menuBar.add(menuStats);
 
-        // Phân quyền: Nhân viên thường không xem được Thống Kê
         if (currentStaff.getRole() == StaffRole.STAFF) {
             menuStats.setVisible(false);
         }
 
         setJMenuBar(menuBar);
 
-        // --- Gắn sự kiện click chuyển trang ---
         itemSales.addActionListener(e -> openSales());
+        itemInvoiceHistory.addActionListener(e -> openInvoiceHistory());
         itemCategory.addActionListener(e -> openCategoryManagement());
         itemBrand.addActionListener(e -> openBrandManagement());
         itemSupplier.addActionListener(e -> openSupplierManagement());
@@ -81,31 +83,36 @@ public class MainFrame extends JFrame {
         itemProduct.addActionListener(e -> openProductManagement());
     }
 
+    private void switchPanel(JPanel newPanel) {
+        centerPanel.removeAll();
+        centerPanel.add(newPanel, BorderLayout.CENTER);
+        centerPanel.revalidate();
+        centerPanel.repaint();
+    }
+
     private void openSales() {
         try {
             ProductRepositoryImpl pRepo = new ProductRepositoryImpl();
             CustomerRepositoryImpl cRepo = new CustomerRepositoryImpl();
             InvoiceRepositoryImpl iRepo = new InvoiceRepositoryImpl();
-
             ProductServiceImpl pService = new ProductServiceImpl(pRepo);
             CustomerServiceImpl cService = new CustomerServiceImpl(cRepo);
             InvoiceServiceImpl iService = new InvoiceServiceImpl(iRepo);
 
             SalesPanel view = new SalesPanel();
             new SalesController(view, pService, cService, iService, currentStaff);
-            
             switchPanel(view);
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this, "Lỗi khi mở màn hình bán hàng: " + e.getMessage());
         }
     }
 
-    // Hàm tiện ích: Xóa giao diện cũ, nhét giao diện mới vào giữa màn hình
-    private void switchPanel(JPanel newPanel) {
-        centerPanel.removeAll();
-        centerPanel.add(newPanel, BorderLayout.CENTER);
-        centerPanel.revalidate();
-        centerPanel.repaint();
+    private void openInvoiceHistory() {
+        InvoiceRepositoryImpl repo = new InvoiceRepositoryImpl();
+        InvoiceServiceImpl service = new InvoiceServiceImpl(repo);
+        InvoiceManagementPanel view = new InvoiceManagementPanel();
+        new InvoiceController(service, view);
+        switchPanel(view);
     }
 
     private void openCategoryManagement() {
@@ -144,11 +151,9 @@ public class MainFrame extends JFrame {
         ProductRepositoryImpl productRepo = new ProductRepositoryImpl();
         CategoryRepositoryImpl categoryRepo = new CategoryRepositoryImpl();
         BrandRepositoryImpl brandRepo = new BrandRepositoryImpl();
-        
         ProductServiceImpl productService = new ProductServiceImpl(productRepo);
         CategoryServiceImpl categoryService = new CategoryServiceImpl(categoryRepo);
         BrandServiceImpl brandService = new BrandServiceImpl(brandRepo);
-        
         ProductManagementPanel view = new ProductManagementPanel();
         new ProductController(productService, categoryService, brandService, view, currentStaff);
         switchPanel(view);

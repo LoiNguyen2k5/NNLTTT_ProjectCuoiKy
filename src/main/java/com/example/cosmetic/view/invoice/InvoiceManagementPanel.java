@@ -7,30 +7,23 @@ import java.awt.*;
 public class InvoiceManagementPanel extends JPanel {
     private JTable table;
     private DefaultTableModel tableModel;
-    private JButton btnViewDetail, btnRefresh;
+    private JButton btnRefresh;
 
     public InvoiceManagementPanel() {
         setLayout(new BorderLayout(10, 10));
-        setBorder(BorderFactory.createTitledBorder("Lịch sử Hóa đơn đã bán"));
 
-        // Bảng hiển thị danh sách hóa đơn
-        tableModel = new DefaultTableModel(new String[]{"ID", "Ngày lập", "Tổng tiền", "Nhân viên", "Khách hàng"}, 0);
+        JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        btnRefresh = new JButton("Làm mới danh sách");
+        topPanel.add(btnRefresh);
+        add(topPanel, BorderLayout.NORTH);
+
+        tableModel = new DefaultTableModel(new String[]{"ID", "Mã HĐ", "Khách Hàng", "Nhân Viên Lập", "Ngày Lập", "Tổng Tiền (VND)"}, 0) {
+            @Override public boolean isCellEditable(int row, int column) { return false; }
+        };
         table = new JTable(tableModel);
         add(new JScrollPane(table), BorderLayout.CENTER);
-
-        // Nút chức năng
-        JPanel pnlButtons = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        btnViewDetail = new JButton("Xem chi tiết hóa đơn");
-        btnRefresh = new JButton("Làm mới danh sách");
-        pnlButtons.add(btnViewDetail);
-        pnlButtons.add(btnRefresh);
-
-        add(pnlButtons, BorderLayout.SOUTH);
     }
 
-    // Getters
-    public JTable getTable() { return table; }
     public DefaultTableModel getTableModel() { return tableModel; }
-    public JButton getBtnViewDetail() { return btnViewDetail; }
     public JButton getBtnRefresh() { return btnRefresh; }
 }
