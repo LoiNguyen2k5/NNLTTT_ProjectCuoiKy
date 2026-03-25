@@ -15,6 +15,7 @@ import com.example.cosmetic.view.invoice.InvoiceManagementPanel;
 import com.example.cosmetic.view.invoice.ImportPanel;
 import com.example.cosmetic.view.invoice.ImportHistoryPanel;
 import com.example.cosmetic.view.statistics.StatisticsPanel;
+import com.example.cosmetic.view.staff.StaffManagementPanel;
 import com.example.cosmetic.controller.*;
 import com.example.cosmetic.view.utils.DatabaseBackupUtil;
 
@@ -90,13 +91,16 @@ public class MainFrame extends JFrame {
         // 5. Menu Hệ Thống (Admin)
         JMenu menuSystem = new JMenu("Hệ Thống");
         JMenuItem itemBackup = new JMenuItem("Sao lưu dữ liệu (Backup DB)");
+        JMenuItem itemStaff = new JMenuItem("Quản lý Nhân Viên");
+        
+        menuSystem.add(itemStaff);
+        menuSystem.addSeparator();
         menuSystem.add(itemBackup);
 
         // 6. Menu Giao Diện (Thanh gạt Dark Mode)
         JMenu menuView = new JMenu("Giao Diện");
         JCheckBoxMenuItem itemDarkMode = new JCheckBoxMenuItem("Chế độ Tối (Dark Mode)");
         
-        // Bắt sự kiện click vào nút Dark Mode
         itemDarkMode.addActionListener(e -> {
             try {
                 if (itemDarkMode.isSelected()) {
@@ -104,7 +108,6 @@ public class MainFrame extends JFrame {
                 } else {
                     UIManager.setLookAndFeel(new FlatLightLaf());
                 }
-                // Cập nhật lại giao diện ngay lập tức
                 SwingUtilities.updateComponentTreeUI(this);
             } catch (Exception ex) {
                 ex.printStackTrace();
@@ -117,13 +120,13 @@ public class MainFrame extends JFrame {
         menuBar.add(menuKho);
         menuBar.add(menuCatalog);
         menuBar.add(menuStats);
-        menuBar.add(menuView); // Menu giao diện ai cũng thấy được
+        menuBar.add(menuView);
 
-        // Phân quyền
+        // Phân quyền hiển thị Menu
         if (currentStaff.getRole() == StaffRole.STAFF) {
             menuStats.setVisible(false);
         } else {
-            menuBar.add(menuSystem);
+            menuBar.add(menuSystem); 
         }
 
         setJMenuBar(menuBar);
@@ -143,6 +146,7 @@ public class MainFrame extends JFrame {
         
         itemStats.addActionListener(e -> openStatistics());
         itemBackup.addActionListener(e -> performDatabaseBackup());
+        itemStaff.addActionListener(e -> openStaffManagement()); 
     }
 
     private void switchPanel(JPanel newPanel) {
@@ -260,6 +264,22 @@ public class MainFrame extends JFrame {
         StatisticsPanel view = new StatisticsPanel();
         new StatisticsController(service, view);
         switchPanel(view);
+    }
+
+    // =========================================================
+    // HÀM MỞ GIAO DIỆN QUẢN LÝ NHÂN VIÊN (ĐÃ SỬA CHUẨN MVC)
+    // =========================================================
+    private void openStaffManagement() {
+        try {
+            StaffRepositoryImpl repo = new StaffRepositoryImpl();
+            StaffServiceImpl service = new StaffServiceImpl(repo);
+            StaffManagementPanel view = new StaffManagementPanel();
+            
+            new StaffController(view, service); 
+            switchPanel(view);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Lỗi mở giao diện nhân viên: " + e.getMessage());
+        }
     }
 
     // =========================================================
