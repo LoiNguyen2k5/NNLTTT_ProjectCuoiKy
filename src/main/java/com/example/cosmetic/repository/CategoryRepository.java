@@ -9,4 +9,6 @@ public interface CategoryRepository {
     void save(Category category);
     void update(Category category);
     void delete(Long id);
+    // THÊM HÀM TÌM KIẾM
+    List<Category> searchByName(String keyword); 
 }

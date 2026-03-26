@@ -90,8 +90,8 @@ public class MainFrame extends JFrame {
 
         // 5. Menu Hệ Thống (Admin)
         JMenu menuSystem = new JMenu("Hệ Thống");
-        JMenuItem itemBackup = new JMenuItem("Sao lưu dữ liệu (Backup DB)");
         JMenuItem itemStaff = new JMenuItem("Quản lý Nhân Viên");
+        JMenuItem itemBackup = new JMenuItem("Sao lưu dữ liệu (Backup DB)");
         
         menuSystem.add(itemStaff);
         menuSystem.addSeparator();
@@ -124,9 +124,9 @@ public class MainFrame extends JFrame {
 
         // Phân quyền hiển thị Menu
         if (currentStaff.getRole() == StaffRole.STAFF) {
-            menuStats.setVisible(false);
+            menuStats.setVisible(false); // Staff không xem được thống kê
         } else {
-            menuBar.add(menuSystem); 
+            menuBar.add(menuSystem);     // Admin mới thấy menu Hệ thống
         }
 
         setJMenuBar(menuBar);
@@ -157,7 +157,7 @@ public class MainFrame extends JFrame {
     }
 
     // =========================================================
-    // CÁC HÀM MỞ GIAO DIỆN CHỨC NĂNG
+    // CÁC HÀM MỞ GIAO DIỆN CHỨC NĂNG (CHUẨN MVC)
     // =========================================================
 
     private void openSales() {
@@ -266,9 +266,6 @@ public class MainFrame extends JFrame {
         switchPanel(view);
     }
 
-    // =========================================================
-    // HÀM MỞ GIAO DIỆN QUẢN LÝ NHÂN VIÊN (ĐÃ SỬA CHUẨN MVC)
-    // =========================================================
     private void openStaffManagement() {
         try {
             StaffRepositoryImpl repo = new StaffRepositoryImpl();
@@ -300,7 +297,7 @@ public class MainFrame extends JFrame {
             String savePath = fileToSave.getAbsolutePath();
 
             String dbUser = "root"; 
-            String dbPass = "12345"; // Đổi thành mật khẩu MySQL của bạn
+            String dbPass = "123456"; // Đổi thành mật khẩu MySQL của bạn nếu cần
             String dbName = "cosmetics_management";
 
             boolean success = DatabaseBackupUtil.backup(dbUser, dbPass, dbName, savePath);

@@ -41,7 +41,18 @@ public class CategoryServiceImpl implements CategoryService {
         categoryRepository.delete(id);
     }
 
-    // Hàm dùng chung để check lỗi
+    // =====================================
+    // IMPLEMENT HÀM TÌM KIẾM
+    // =====================================
+    @Override
+    public List<Category> searchCategories(String keyword) {
+        // Nếu người dùng để trống ô tìm kiếm, trả về toàn bộ danh sách
+        if (keyword == null || keyword.trim().isEmpty()) {
+            return categoryRepository.findAll();
+        }
+        return categoryRepository.searchByName(keyword.trim());
+    }
+
     private void validateCategory(Category category) throws Exception {
         if (category.getName() == null || category.getName().trim().isEmpty()) {
             throw new Exception("Tên loại mỹ phẩm không được để trống!");

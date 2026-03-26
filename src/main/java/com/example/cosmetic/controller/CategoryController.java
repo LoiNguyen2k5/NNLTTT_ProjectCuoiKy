@@ -20,7 +20,7 @@ public class CategoryController {
         this.currentStaff = currentStaff;
 
         initController();
-        handlePermissions(); // Hàm này để khóa nút
+        handlePermissions(); 
         loadDataToTable();
     }
 
@@ -38,6 +38,10 @@ public class CategoryController {
         view.getBtnUpdate().addActionListener(e -> updateCategory());
         view.getBtnDelete().addActionListener(e -> deleteCategory());
         view.getBtnClear().addActionListener(e -> clearForm());
+        
+        // --- SỰ KIỆN TÌM KIẾM ---
+        view.getBtnSearch().addActionListener(e -> searchCategory());
+
         view.getTable().getSelectionModel().addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting() && view.getTable().getSelectedRow() != -1) fillDataToForm();
         });
@@ -49,6 +53,20 @@ public class CategoryController {
         for (Category c : list) view.getTableModel().addRow(new Object[]{c.getId(), c.getName(), c.getDescription()});
     }
 
+    // --- HÀM TÌM KIẾM ---
+    private void searchCategory() {
+        String keyword = view.getTxtSearch().getText();
+        view.getTableModel().setRowCount(0); // Xóa trắng bảng
+        try {
+            List<Category> list = categoryService.searchCategories(keyword);
+            for (Category c : list) {
+                view.getTableModel().addRow(new Object[]{c.getId(), c.getName(), c.getDescription()});
+            }
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(view, "Lỗi tìm kiếm: " + ex.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
     private void fillDataToForm() {
         int row = view.getTable().getSelectedRow();
         view.getTxtId().setText(view.getTable().getValueAt(row, 0).toString());
@@ -56,14 +74,21 @@ public class CategoryController {
         view.getTxtDescription().setText(view.getTable().getValueAt(row, 2) != null ? view.getTable().getValueAt(row, 2).toString() : "");
     }
 
-    private void clearForm() { view.getTxtId().setText(""); view.getTxtName().setText(""); view.getTxtDescription().setText(""); view.getTable().clearSelection(); }
+    private void clearForm() { 
+        view.getTxtId().setText(""); 
+        view.getTxtName().setText(""); 
+        view.getTxtDescription().setText(""); 
+        view.getTxtSearch().setText(""); // Xóa luôn ô search khi làm mới
+        view.getTable().clearSelection(); 
+        loadDataToTable(); // Load lại toàn bộ data khi clear form
+    }
 
     private void addCategory() {
         try {
             Category c = new Category(view.getTxtName().getText(), view.getTxtDescription().getText());
             categoryService.addCategory(c);
             JOptionPane.showMessageDialog(view, "Thêm thành công!");
-            clearForm(); loadDataToTable();
+            clearForm(); 
         } catch (Exception ex) { JOptionPane.showMessageDialog(view, ex.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE); }
     }
 
@@ -75,7 +100,7 @@ public class CategoryController {
             c.setDescription(view.getTxtDescription().getText());
             categoryService.updateCategory(c);
             JOptionPane.showMessageDialog(view, "Cập nhật thành công!");
-            clearForm(); loadDataToTable();
+            clearForm(); 
         } catch (Exception ex) { JOptionPane.showMessageDialog(view, ex.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE); }
     }
 
@@ -85,7 +110,7 @@ public class CategoryController {
             if (confirm == JOptionPane.YES_OPTION) {
                 categoryService.deleteCategory(Long.parseLong(view.getTxtId().getText()));
                 JOptionPane.showMessageDialog(view, "Xóa thành công!");
-                clearForm(); loadDataToTable();
+                clearForm(); 
             }
         } catch (Exception ex) { JOptionPane.showMessageDialog(view, "Lỗi: " + ex.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE); }
     }

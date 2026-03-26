@@ -80,4 +80,21 @@ public class CategoryRepositoryImpl implements CategoryRepository {
             em.close();
         }
     }
+
+    // =====================================
+    // IMPLEMENT HÀM TÌM KIẾM
+    // =====================================
+    @Override
+    public List<Category> searchByName(String keyword) {
+        EntityManager em = JpaUtil.getEntityManager();
+        try {
+            // Tìm theo tên hoặc mô tả có chứa từ khóa
+            String jpql = "SELECT c FROM Category c WHERE c.name LIKE :keyword OR c.description LIKE :keyword";
+            return em.createQuery(jpql, Category.class)
+                     .setParameter("keyword", "%" + keyword + "%")
+                     .getResultList();
+        } finally {
+            em.close();
+        }
+    }
 }

@@ -10,17 +10,17 @@ import javax.swing.*;
 import java.util.List;
 
 public class SupplierController {
-    private final SupplierService service;
+    private final SupplierService supplierService;
     private final SupplierManagementPanel view;
     private final Staff currentStaff;
 
-    public SupplierController(SupplierService service, SupplierManagementPanel view, Staff currentStaff) {
-        this.service = service;
+    public SupplierController(SupplierService supplierService, SupplierManagementPanel view, Staff currentStaff) {
+        this.supplierService = supplierService;
         this.view = view;
         this.currentStaff = currentStaff;
 
         initController();
-        handlePermissions();
+        handlePermissions(); 
         loadDataToTable();
     }
 
@@ -29,6 +29,7 @@ public class SupplierController {
             view.getBtnAdd().setEnabled(false);
             view.getBtnUpdate().setEnabled(false);
             view.getBtnDelete().setEnabled(false);
+            view.getBtnAdd().setToolTipText("Chỉ Admin mới có quyền thao tác");
         }
     }
 
@@ -37,6 +38,8 @@ public class SupplierController {
         view.getBtnUpdate().addActionListener(e -> updateSupplier());
         view.getBtnDelete().addActionListener(e -> deleteSupplier());
         view.getBtnClear().addActionListener(e -> clearForm());
+        view.getBtnSearch().addActionListener(e -> searchSupplier());
+
         view.getTable().getSelectionModel().addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting() && view.getTable().getSelectedRow() != -1) fillDataToForm();
         });
@@ -44,29 +47,50 @@ public class SupplierController {
 
     private void loadDataToTable() {
         view.getTableModel().setRowCount(0);
-        List<Supplier> list = service.getAllSuppliers();
-        for (Supplier s : list) view.getTableModel().addRow(new Object[]{s.getId(), s.getName(), s.getAddress(), s.getPhone()});
+        List<Supplier> list = supplierService.getAllSuppliers();
+        for (Supplier s : list) view.getTableModel().addRow(new Object[]{s.getId(), s.getName(), s.getPhone(), s.getAddress()});
+    }
+
+    private void searchSupplier() {
+        String keyword = view.getTxtSearch().getText();
+        view.getTableModel().setRowCount(0);
+        try {
+            List<Supplier> list = supplierService.searchSuppliers(keyword);
+            for (Supplier s : list) {
+                view.getTableModel().addRow(new Object[]{s.getId(), s.getName(), s.getPhone(), s.getAddress()});
+            }
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(view, "Lỗi tìm kiếm: " + ex.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     private void fillDataToForm() {
         int row = view.getTable().getSelectedRow();
         view.getTxtId().setText(view.getTable().getValueAt(row, 0).toString());
         view.getTxtName().setText(view.getTable().getValueAt(row, 1).toString());
-        view.getTxtAddress().setText(view.getTable().getValueAt(row, 2).toString());
-        view.getTxtPhone().setText(view.getTable().getValueAt(row, 3).toString());
+        view.getTxtPhone().setText(view.getTable().getValueAt(row, 2) != null ? view.getTable().getValueAt(row, 2).toString() : "");
+        view.getTxtAddress().setText(view.getTable().getValueAt(row, 3) != null ? view.getTable().getValueAt(row, 3).toString() : "");
     }
 
-    private void clearForm() { view.getTxtId().setText(""); view.getTxtName().setText(""); view.getTxtAddress().setText(""); view.getTxtPhone().setText(""); view.getTable().clearSelection(); }
+    private void clearForm() { 
+        view.getTxtId().setText(""); 
+        view.getTxtName().setText(""); 
+        view.getTxtPhone().setText(""); 
+        view.getTxtAddress().setText(""); 
+        view.getTxtSearch().setText("");
+        view.getTable().clearSelection(); 
+        loadDataToTable(); 
+    }
 
     private void addSupplier() {
         try {
             Supplier s = new Supplier();
             s.setName(view.getTxtName().getText());
-            s.setAddress(view.getTxtAddress().getText());
             s.setPhone(view.getTxtPhone().getText());
-            service.addSupplier(s);
-            JOptionPane.showMessageDialog(view, "Thành công!");
-            clearForm(); loadDataToTable();
+            s.setAddress(view.getTxtAddress().getText());
+            supplierService.addSupplier(s);
+            JOptionPane.showMessageDialog(view, "Thêm thành công!");
+            clearForm(); 
         } catch (Exception ex) { JOptionPane.showMessageDialog(view, ex.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE); }
     }
 
@@ -75,19 +99,22 @@ public class SupplierController {
             Supplier s = new Supplier();
             s.setId(Long.parseLong(view.getTxtId().getText()));
             s.setName(view.getTxtName().getText());
-            s.setAddress(view.getTxtAddress().getText());
             s.setPhone(view.getTxtPhone().getText());
-            service.updateSupplier(s);
-            JOptionPane.showMessageDialog(view, "Thành công!");
-            clearForm(); loadDataToTable();
+            s.setAddress(view.getTxtAddress().getText());
+            supplierService.updateSupplier(s);
+            JOptionPane.showMessageDialog(view, "Cập nhật thành công!");
+            clearForm(); 
         } catch (Exception ex) { JOptionPane.showMessageDialog(view, ex.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE); }
     }
 
     private void deleteSupplier() {
         try {
-            service.deleteSupplier(Long.parseLong(view.getTxtId().getText()));
-            JOptionPane.showMessageDialog(view, "Thành công!");
-            clearForm(); loadDataToTable();
-        } catch (Exception ex) { JOptionPane.showMessageDialog(view, "Lỗi!", "Lỗi", JOptionPane.ERROR_MESSAGE); }
+            int confirm = JOptionPane.showConfirmDialog(view, "Xóa NCC này?", "Xác nhận", JOptionPane.YES_NO_OPTION);
+            if (confirm == JOptionPane.YES_OPTION) {
+                supplierService.deleteSupplier(Long.parseLong(view.getTxtId().getText()));
+                JOptionPane.showMessageDialog(view, "Xóa thành công!");
+                clearForm(); 
+            }
+        } catch (Exception ex) { JOptionPane.showMessageDialog(view, "Lỗi: " + ex.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE); }
     }
 }

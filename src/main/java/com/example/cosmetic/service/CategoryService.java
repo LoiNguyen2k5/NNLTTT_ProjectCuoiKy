@@ -8,4 +8,6 @@ public interface CategoryService {
     void addCategory(Category category) throws Exception;
     void updateCategory(Category category) throws Exception;
     void deleteCategory(Long id) throws Exception;
+    // THÊM HÀM TÌM KIẾM
+    List<Category> searchCategories(String keyword);
 }

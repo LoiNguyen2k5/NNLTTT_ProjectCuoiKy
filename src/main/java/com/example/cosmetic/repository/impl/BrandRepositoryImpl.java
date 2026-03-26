@@ -1,29 +1,95 @@
 package com.example.cosmetic.repository.impl;
+
 import com.example.cosmetic.config.JpaUtil;
 import com.example.cosmetic.model.entity.Brand;
 import com.example.cosmetic.repository.BrandRepository;
-import jakarta.persistence.*;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityTransaction;
 import java.util.List;
 
 public class BrandRepositoryImpl implements BrandRepository {
-    @Override public List<Brand> findAll() {
+
+    @Override
+    public List<Brand> findAll() {
         EntityManager em = JpaUtil.getEntityManager();
-        try { return em.createQuery("SELECT b FROM Brand b", Brand.class).getResultList(); } finally { em.close(); }
+        try {
+            return em.createQuery("SELECT b FROM Brand b", Brand.class).getResultList();
+        } finally {
+            em.close();
+        }
     }
-    @Override public Brand findById(Long id) {
+
+    @Override
+    public Brand findById(Long id) {
         EntityManager em = JpaUtil.getEntityManager();
-        try { return em.find(Brand.class, id); } finally { em.close(); }
+        try {
+            return em.find(Brand.class, id);
+        } finally {
+            em.close();
+        }
     }
-    @Override public void save(Brand brand) {
-        EntityManager em = JpaUtil.getEntityManager(); EntityTransaction tx = em.getTransaction();
-        try { tx.begin(); em.persist(brand); tx.commit(); } catch (Exception e) { if (tx.isActive()) tx.rollback(); throw e; } finally { em.close(); }
+
+    @Override
+    public void save(Brand brand) {
+        EntityManager em = JpaUtil.getEntityManager();
+        EntityTransaction tx = em.getTransaction();
+        try {
+            tx.begin();
+            em.persist(brand);
+            tx.commit();
+        } catch (Exception e) {
+            if (tx.isActive()) tx.rollback();
+            throw e;
+        } finally {
+            em.close();
+        }
     }
-    @Override public void update(Brand brand) {
-        EntityManager em = JpaUtil.getEntityManager(); EntityTransaction tx = em.getTransaction();
-        try { tx.begin(); em.merge(brand); tx.commit(); } catch (Exception e) { if (tx.isActive()) tx.rollback(); throw e; } finally { em.close(); }
+
+    @Override
+    public void update(Brand brand) {
+        EntityManager em = JpaUtil.getEntityManager();
+        EntityTransaction tx = em.getTransaction();
+        try {
+            tx.begin();
+            em.merge(brand);
+            tx.commit();
+        } catch (Exception e) {
+            if (tx.isActive()) tx.rollback();
+            throw e;
+        } finally {
+            em.close();
+        }
     }
-    @Override public void delete(Long id) {
-        EntityManager em = JpaUtil.getEntityManager(); EntityTransaction tx = em.getTransaction();
-        try { tx.begin(); Brand brand = em.find(Brand.class, id); if (brand != null) em.remove(brand); tx.commit(); } catch (Exception e) { if (tx.isActive()) tx.rollback(); throw e; } finally { em.close(); }
+
+    @Override
+    public void delete(Long id) {
+        EntityManager em = JpaUtil.getEntityManager();
+        EntityTransaction tx = em.getTransaction();
+        try {
+            tx.begin();
+            Brand brand = em.find(Brand.class, id);
+            if (brand != null) {
+                em.remove(brand);
+            }
+            tx.commit();
+        } catch (Exception e) {
+            if (tx.isActive()) tx.rollback();
+            throw e;
+        } finally {
+            em.close();
+        }
+    }
+
+    @Override
+    public List<Brand> searchByName(String keyword) {
+        EntityManager em = JpaUtil.getEntityManager();
+        try {
+            String jpql = "SELECT b FROM Brand b WHERE b.name LIKE :keyword OR b.description LIKE :keyword";
+            return em.createQuery(jpql, Brand.class)
+                     .setParameter("keyword", "%" + keyword + "%")
+                     .getResultList();
+        } finally {
+            em.close();
+        }
     }
 }

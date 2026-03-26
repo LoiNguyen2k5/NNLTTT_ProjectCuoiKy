@@ -20,7 +20,7 @@ public class BrandController {
         this.currentStaff = currentStaff;
 
         initController();
-        handlePermissions();
+        handlePermissions(); 
         loadDataToTable();
     }
 
@@ -29,6 +29,7 @@ public class BrandController {
             view.getBtnAdd().setEnabled(false);
             view.getBtnUpdate().setEnabled(false);
             view.getBtnDelete().setEnabled(false);
+            view.getBtnAdd().setToolTipText("Chỉ Admin mới có quyền thao tác");
         }
     }
 
@@ -37,6 +38,8 @@ public class BrandController {
         view.getBtnUpdate().addActionListener(e -> updateBrand());
         view.getBtnDelete().addActionListener(e -> deleteBrand());
         view.getBtnClear().addActionListener(e -> clearForm());
+        view.getBtnSearch().addActionListener(e -> searchBrand());
+
         view.getTable().getSelectionModel().addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting() && view.getTable().getSelectedRow() != -1) fillDataToForm();
         });
@@ -48,6 +51,19 @@ public class BrandController {
         for (Brand b : list) view.getTableModel().addRow(new Object[]{b.getId(), b.getName(), b.getDescription()});
     }
 
+    private void searchBrand() {
+        String keyword = view.getTxtSearch().getText();
+        view.getTableModel().setRowCount(0);
+        try {
+            List<Brand> list = brandService.searchBrands(keyword);
+            for (Brand b : list) {
+                view.getTableModel().addRow(new Object[]{b.getId(), b.getName(), b.getDescription()});
+            }
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(view, "Lỗi tìm kiếm: " + ex.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
     private void fillDataToForm() {
         int row = view.getTable().getSelectedRow();
         view.getTxtId().setText(view.getTable().getValueAt(row, 0).toString());
@@ -55,7 +71,14 @@ public class BrandController {
         view.getTxtDescription().setText(view.getTable().getValueAt(row, 2) != null ? view.getTable().getValueAt(row, 2).toString() : "");
     }
 
-    private void clearForm() { view.getTxtId().setText(""); view.getTxtName().setText(""); view.getTxtDescription().setText(""); view.getTable().clearSelection(); }
+    private void clearForm() { 
+        view.getTxtId().setText(""); 
+        view.getTxtName().setText(""); 
+        view.getTxtDescription().setText(""); 
+        view.getTxtSearch().setText("");
+        view.getTable().clearSelection(); 
+        loadDataToTable(); 
+    }
 
     private void addBrand() {
         try {
@@ -64,7 +87,7 @@ public class BrandController {
             b.setDescription(view.getTxtDescription().getText());
             brandService.addBrand(b);
             JOptionPane.showMessageDialog(view, "Thêm thành công!");
-            clearForm(); loadDataToTable();
+            clearForm(); 
         } catch (Exception ex) { JOptionPane.showMessageDialog(view, ex.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE); }
     }
 
@@ -75,16 +98,19 @@ public class BrandController {
             b.setName(view.getTxtName().getText());
             b.setDescription(view.getTxtDescription().getText());
             brandService.updateBrand(b);
-            JOptionPane.showMessageDialog(view, "Sửa thành công!");
-            clearForm(); loadDataToTable();
+            JOptionPane.showMessageDialog(view, "Cập nhật thành công!");
+            clearForm(); 
         } catch (Exception ex) { JOptionPane.showMessageDialog(view, ex.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE); }
     }
 
     private void deleteBrand() {
         try {
-            brandService.deleteBrand(Long.parseLong(view.getTxtId().getText()));
-            JOptionPane.showMessageDialog(view, "Xóa thành công!");
-            clearForm(); loadDataToTable();
-        } catch (Exception ex) { JOptionPane.showMessageDialog(view, "Không thể xóa!", "Lỗi", JOptionPane.ERROR_MESSAGE); }
+            int confirm = JOptionPane.showConfirmDialog(view, "Xóa thương hiệu này?", "Xác nhận", JOptionPane.YES_NO_OPTION);
+            if (confirm == JOptionPane.YES_OPTION) {
+                brandService.deleteBrand(Long.parseLong(view.getTxtId().getText()));
+                JOptionPane.showMessageDialog(view, "Xóa thành công!");
+                clearForm(); 
+            }
+        } catch (Exception ex) { JOptionPane.showMessageDialog(view, "Lỗi: " + ex.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE); }
     }
 }
