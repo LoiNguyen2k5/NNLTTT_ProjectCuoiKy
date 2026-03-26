@@ -4,25 +4,26 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 
 public class StatisticsPanel extends JPanel {
-    private JLabel lblTotalCustomers, lblOutOfStock, lblTodayRevenue, lblTotalRevenue;
-    private JTable tableTopSelling;
-    private DefaultTableModel tableModel;
+    private JLabel lblTotalCustomers, lblOutOfStock, lblTodayRevenue, lblTotalRevenue, lblExpiringSoon;
+    private JTable tableTopSelling, tableExpiring;
+    private DefaultTableModel tableModel, expiringModel;
     private JButton btnRefresh, btnExportPDF; // Khai báo thêm nút xuất PDF
     private JPanel pnlChart; 
 
     public StatisticsPanel() {
         setLayout(new BorderLayout(10, 10));
 
-        JPanel pnlDashboard = new JPanel(new GridLayout(1, 4, 10, 10));
+        JPanel pnlDashboard = new JPanel(new GridLayout(1, 5, 10, 10));
         pnlDashboard.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
         lblTotalCustomers = createDashboardBox("Tổng Khách", pnlDashboard, new Color(100, 200, 255));
-        lblOutOfStock = createDashboardBox("SP Hết Hàng", pnlDashboard, new Color(255, 100, 100));
-        lblTodayRevenue = createDashboardBox("Doanh Thu Hôm Nay", pnlDashboard, new Color(100, 255, 100));
-        lblTotalRevenue = createDashboardBox("TỔNG DOANH THU", pnlDashboard, new Color(255, 200, 100)); 
+        lblOutOfStock = createDashboardBox("Hết Hàng", pnlDashboard, new Color(255, 100, 100));
+        lblExpiringSoon = createDashboardBox("Sắp Hết Hạn (<30đ)", pnlDashboard, new Color(255, 150, 50));
+        lblTodayRevenue = createDashboardBox("DT Hôm Nay", pnlDashboard, new Color(100, 255, 100));
+        lblTotalRevenue = createDashboardBox("TỔNG DT", pnlDashboard, new Color(255, 200, 100)); 
         add(pnlDashboard, BorderLayout.NORTH);
 
-        JPanel pnlCenter = new JPanel(new GridLayout(1, 2, 10, 0));
+        JPanel pnlCenter = new JPanel(new GridLayout(1, 3, 10, 0));
         
         JPanel pnlTable = new JPanel(new BorderLayout());
         pnlTable.setBorder(BorderFactory.createTitledBorder("Top 10 Bán Chạy Nhất"));
@@ -30,10 +31,17 @@ public class StatisticsPanel extends JPanel {
         tableTopSelling = new JTable(tableModel);
         pnlTable.add(new JScrollPane(tableTopSelling), BorderLayout.CENTER);
         
+        JPanel pnlExpiring = new JPanel(new BorderLayout());
+        pnlExpiring.setBorder(BorderFactory.createTitledBorder("Cảnh Báo Sắp Hết Hạn"));
+        expiringModel = new DefaultTableModel(new String[]{"Tên Sản Phẩm", "Tồn", "Hạn Sử Dụng"}, 0);
+        tableExpiring = new JTable(expiringModel);
+        pnlExpiring.add(new JScrollPane(tableExpiring), BorderLayout.CENTER);
+        
         pnlChart = new JPanel(new BorderLayout());
         pnlChart.setBorder(BorderFactory.createTitledBorder("Biểu đồ Doanh Thu"));
         
         pnlCenter.add(pnlTable);
+        pnlCenter.add(pnlExpiring);
         pnlCenter.add(pnlChart);
         add(pnlCenter, BorderLayout.CENTER);
 
@@ -75,7 +83,9 @@ public class StatisticsPanel extends JPanel {
     public JLabel getLblOutOfStock() { return lblOutOfStock; }
     public JLabel getLblTodayRevenue() { return lblTodayRevenue; }
     public JLabel getLblTotalRevenue() { return lblTotalRevenue; }
+    public JLabel getLblExpiringSoon() { return lblExpiringSoon; }
     public DefaultTableModel getTableModel() { return tableModel; }
+    public DefaultTableModel getExpiringModel() { return expiringModel; }
     public JButton getBtnRefresh() { return btnRefresh; }
     public JButton getBtnExportPDF() { return btnExportPDF; } // Getter mới
     public JPanel getPnlChart() { return pnlChart; } 

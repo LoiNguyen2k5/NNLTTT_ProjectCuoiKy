@@ -11,9 +11,11 @@ public class SalesPanel extends JPanel {
     private JTextField txtQuantity;
     private JButton btnAddCart;
     private JComboBox<Customer> cbCustomer; 
+    private JLabel lblCustomerPoints;
     private JTable tableCart;
     private DefaultTableModel cartModel;
     private JTextField txtTotal;
+    private JCheckBox chkUsePoints;
     private JButton btnCheckout;
 
     public SalesPanel() {
@@ -37,6 +39,9 @@ public class SalesPanel extends JPanel {
         pnlTop.add(new JLabel("Khách hàng:"));
         cbCustomer = new JComboBox<>();
         pnlTop.add(cbCustomer);
+        lblCustomerPoints = new JLabel("Điểm: 0");
+        lblCustomerPoints.setForeground(Color.BLUE);
+        pnlTop.add(lblCustomerPoints);
         add(pnlTop, BorderLayout.NORTH);
 
         cartModel = new DefaultTableModel(new String[]{"ID SP", "Barcode", "Tên Mỹ Phẩm", "Số lượng", "Đơn giá", "Thành tiền"}, 0) {
@@ -53,7 +58,9 @@ public class SalesPanel extends JPanel {
         pnlBottom.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
 
         JPanel pnlTotal = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        pnlTotal.add(new JLabel("TỔNG TIỀN PHẢI THANH TOÁN (VND):"));
+        chkUsePoints = new JCheckBox("Dùng điểm giảm giá");
+        pnlTotal.add(chkUsePoints);
+        pnlTotal.add(new JLabel(" | TỔNG TIỀN PHẢI THANH TOÁN (VND):"));
         txtTotal = new JTextField("0", 15);
         txtTotal.setEditable(false);
         txtTotal.setFont(new Font("Arial", Font.BOLD, 16));
@@ -77,8 +84,10 @@ public class SalesPanel extends JPanel {
     public JTextField getTxtQuantity() { return txtQuantity; }
     public JButton getBtnAddCart() { return btnAddCart; }
     public JComboBox<Customer> getCbCustomer() { return cbCustomer; } 
+    public JLabel getLblCustomerPoints() { return lblCustomerPoints; }
     public JTable getTableCart() { return tableCart; }
     public DefaultTableModel getCartModel() { return cartModel; }
     public JTextField getTxtTotal() { return txtTotal; }
+    public JCheckBox getChkUsePoints() { return chkUsePoints; }
     public JButton getBtnCheckout() { return btnCheckout; }
 }

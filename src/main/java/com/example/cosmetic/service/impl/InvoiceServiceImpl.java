@@ -32,6 +32,11 @@ public class InvoiceServiceImpl implements InvoiceService {
             // Lưu thông tin Hóa đơn
             em.persist(invoice);
             
+            // Cập nhật điểm tích lũy của Khách hàng
+            if (invoice.getCustomer() != null) {
+                em.merge(invoice.getCustomer());
+            }
+            
             // Xử lý lưu Chi tiết và TRỪ KHO
             for (InvoiceDetail detail : invoice.getDetails()) {
                 Product p = em.find(Product.class, detail.getProduct().getId());

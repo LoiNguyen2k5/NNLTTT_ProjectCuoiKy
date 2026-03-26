@@ -44,11 +44,42 @@ public class SalesController {
     private void initEvents() {
         view.getBtnAddCart().addActionListener(e -> addToCart());
         view.getBtnCheckout().addActionListener(e -> processCheckout());
+        view.getCbCustomer().addActionListener(e -> updateCustomerPointsInfo());
+        view.getChkUsePoints().addActionListener(e -> calculateTotal());
+    }
+
+    private void updateCustomerPointsInfo() {
+        Customer selectedCustomer = (Customer) view.getCbCustomer().getSelectedItem();
+        if (selectedCustomer != null) {
+            view.getLblCustomerPoints().setText("Điểm: " + selectedCustomer.getPoints());
+        } else {
+            view.getLblCustomerPoints().setText("Điểm: 0");
+        }
+        view.getChkUsePoints().setSelected(false);
+        calculateTotal();
     }
 
     private void addToCart() {
         Product selectedProd = (Product) view.getCbProduct().getSelectedItem();
         if (selectedProd == null) return; 
+
+        // --- Kiểm tra Hạn sử dụng (Date) ---
+        java.util.Date expDate = selectedProd.getExpirationDate();
+        if (expDate != null) {
+            long diff = expDate.getTime() - System.currentTimeMillis();
+            long days = diff / (1000 * 60 * 60 * 24);
+            if (days <= 30) {
+                String msg = (days < 0) ? "Sản phẩm này đã QUÁ HẠN SỬ DỤNG!" : "Sản phẩm này sắp hết hạn (còn " + days + " ngày).";
+                int result = JOptionPane.showConfirmDialog(view, 
+                    msg + "\nBạn có chắc chắn muốn thêm sản phẩm này vào giỏ hàng?", 
+                    "Cảnh Báo Hạn Sử Dụng", 
+                    JOptionPane.YES_NO_OPTION, 
+                    JOptionPane.WARNING_MESSAGE);
+                if (result != JOptionPane.YES_OPTION) {
+                    return; // Hủy thêm vào giỏ
+                }
+            }
+        }
 
         int qty;
         try {
@@ -93,6 +124,20 @@ public class SalesController {
             grandTotal = grandTotal.add((BigDecimal) view.getCartModel().getValueAt(i, 5));
         }
         
+        if (view.getChkUsePoints().isSelected()) {
+            Customer selectedCustomer = (Customer) view.getCbCustomer().getSelectedItem();
+            if (selectedCustomer != null && selectedCustomer.getPoints() > 0) {
+                BigDecimal discount = new BigDecimal(selectedCustomer.getPoints() * 1000);
+                if (grandTotal.compareTo(discount) < 0) {
+                    discount = grandTotal;
+                }
+                grandTotal = grandTotal.subtract(discount);
+            } else {
+                view.getChkUsePoints().setSelected(false);
+                JOptionPane.showMessageDialog(view, "Khách hàng không có điểm tích lũy hoặc chưa chọn khách hàng!");
+            }
+        }
+        
         DecimalFormat df = new DecimalFormat("#,###");
         view.getTxtTotal().setText(df.format(grandTotal));
     }
@@ -130,6 +175,24 @@ public class SalesController {
                 
                 finalTotal = finalTotal.add((BigDecimal) view.getCartModel().getValueAt(i, 5));
             }
+            
+            // Xử lý điểm tích lũy
+            int pointsUsed = 0;
+            if (view.getChkUsePoints().isSelected() && selectedCustomer.getPoints() > 0) {
+                BigDecimal maxDiscount = new BigDecimal(selectedCustomer.getPoints() * 1000);
+                if (finalTotal.compareTo(maxDiscount) < 0) {
+                    pointsUsed = finalTotal.divide(new BigDecimal(1000), 0, java.math.RoundingMode.UP).intValue();
+                    finalTotal = BigDecimal.ZERO;
+                } else {
+                    pointsUsed = selectedCustomer.getPoints();
+                    finalTotal = finalTotal.subtract(maxDiscount);
+                }
+            }
+            
+            selectedCustomer.setPoints(selectedCustomer.getPoints() - pointsUsed);
+            
+            int earnedPoints = finalTotal.divide(new BigDecimal(100000), 0, java.math.RoundingMode.DOWN).intValue();
+            selectedCustomer.setPoints(selectedCustomer.getPoints() + earnedPoints);
             
             invoice.setTotalAmount(finalTotal);
             invoice.setDetails(details);

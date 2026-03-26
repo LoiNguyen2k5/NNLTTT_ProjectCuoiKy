@@ -56,4 +56,19 @@ public class StatisticsRepositoryImpl implements StatisticsRepository {
             return em.createQuery(jpql, Object[].class).setMaxResults(10).getResultList();
         } finally { em.close(); }
     }
+
+    @Override
+    public List<Object[]> getExpiringProducts(int daysThreshold) {
+        EntityManager em = JpaUtil.getEntityManager();
+        try {
+            LocalDate thresholdDateLocal = LocalDate.now().plusDays(daysThreshold);
+            Date thresholdDate = Date.from(thresholdDateLocal.atStartOfDay(ZoneId.systemDefault()).toInstant());
+            
+            String jpql = "SELECT p.name, p.quantity, p.expirationDate FROM Product p " +
+                          "WHERE p.expirationDate IS NOT NULL AND p.expirationDate <= :threshold " +
+                          "AND p.quantity > 0 ORDER BY p.expirationDate ASC";
+            
+            return em.createQuery(jpql, Object[].class).setParameter("threshold", thresholdDate).getResultList();
+        } finally { em.close(); }
+    }
 }

@@ -22,6 +22,10 @@ public class Product {
     @Column(nullable = false)
     private Integer quantity; // Số lượng tồn kho
 
+    @Column(name = "expiration_date")
+    @Temporal(TemporalType.DATE)
+    private java.util.Date expirationDate;
+
     @ManyToOne // Một loại có nhiều sản phẩm [cite: 1, 221-222]
     @JoinColumn(name = "category_id", nullable = false)
     private Category category;
@@ -47,6 +51,8 @@ public class Product {
     public void setCategory(Category category) { this.category = category; }
     public Brand getBrand() { return brand; }
     public void setBrand(Brand brand) { this.brand = brand; }
+    public java.util.Date getExpirationDate() { return expirationDate; }
+    public void setExpirationDate(java.util.Date expirationDate) { this.expirationDate = expirationDate; }
 
     @Override
     public String toString() { return name; }

@@ -8,4 +8,5 @@ public interface StatisticsService {
     BigDecimal getTodayRevenue();
     BigDecimal getTotalRevenue(); // Bổ sung
     List<Object[]> getTopSellingProducts();
+    List<Object[]> getExpiringProducts(int daysThreshold);
 }

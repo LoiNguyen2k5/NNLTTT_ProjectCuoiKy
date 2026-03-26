@@ -6,6 +6,7 @@ import com.example.cosmetic.view.product.ProductManagementPanel;
 import javax.swing.*;
 import com.example.cosmetic.model.enums.StaffRole;
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
 import java.util.List;
 
 public class ProductController {
@@ -23,7 +24,7 @@ public class ProductController {
         this.currentStaff = staff;
         
         loadComboBoxes();
-        loadTable();
+        loadTable(productService.getAllProducts());
         initEvents();
         
         // Phân quyền: Chỉ ADMIN mới được Thêm/Sửa/Xóa
@@ -41,11 +42,12 @@ public class ProductController {
         brandService.getAllBrands().forEach(b -> view.getCbBrand().addItem(b));
     }
 
-    private void loadTable() {
+    private void loadTable(List<Product> list) {
         view.getTableModel().setRowCount(0);
-        List<Product> list = productService.getAllProducts();
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
         if (list != null) {
             list.forEach(p -> {
+                String expDateStr = p.getExpirationDate() != null ? sdf.format(p.getExpirationDate()) : "";
                 view.getTableModel().addRow(new Object[]{
                     p.getId(), 
                     p.getBarcode(), 
@@ -53,7 +55,8 @@ public class ProductController {
                     p.getPrice(), 
                     p.getQuantity(), 
                     p.getCategory() != null ? p.getCategory().getName() : "", 
-                    p.getBrand() != null ? p.getBrand().getName() : ""
+                    p.getBrand() != null ? p.getBrand().getName() : "",
+                    expDateStr
                 });
             });
         }
@@ -70,6 +73,9 @@ public class ProductController {
                     view.getTxtName().setText(view.getTable().getValueAt(row, 2).toString());
                     view.getTxtPrice().setText(view.getTable().getValueAt(row, 3).toString());
                     view.getTxtQuantity().setText(view.getTable().getValueAt(row, 4).toString());
+                    
+                    Object expObj = view.getTable().getValueAt(row, 7);
+                    view.getTxtExpirationDate().setText(expObj != null ? expObj.toString() : "");
                 }
             }
         });
@@ -78,7 +84,7 @@ public class ProductController {
         view.getBtnAdd().addActionListener(e -> {
             try {
                 productService.addProduct(getProductFromForm());
-                loadTable();
+                loadTable(productService.getAllProducts());
                 clearForm();
                 JOptionPane.showMessageDialog(view, "Thêm thành công!");
             } catch (Exception ex) { 
@@ -98,7 +104,7 @@ public class ProductController {
                 // Lấy ID an toàn bằng ngoặc đơn ()
                 p.setId(Long.parseLong(view.getTable().getValueAt(row, 0).toString())); 
                 productService.updateProduct(p);
-                loadTable();
+                loadTable(productService.getAllProducts());
                 clearForm();
                 JOptionPane.showMessageDialog(view, "Cập nhật thành công!");
             } catch (Exception ex) { 
@@ -118,12 +124,25 @@ public class ProductController {
                 try {
                     Long id = Long.parseLong(view.getTable().getValueAt(row, 0).toString());
                     productService.deleteProduct(id);
-                    loadTable();
+                    loadTable(productService.getAllProducts());
                     clearForm();
                     JOptionPane.showMessageDialog(view, "Xóa thành công!");
                 } catch (Exception ex) { 
                     JOptionPane.showMessageDialog(view, "Lỗi: " + ex.getMessage()); 
                 }
+            }
+        });
+
+        // Xử lý nút Clear
+        view.getBtnClear().addActionListener(e -> clearForm());
+
+        // Xử lý nút Tìm kiếm
+        view.getBtnSearch().addActionListener(e -> {
+            String keyword = view.getTxtSearch().getText().trim();
+            if (keyword.isEmpty()) {
+                loadTable(productService.getAllProducts());
+            } else {
+                loadTable(productService.searchProducts(keyword));
             }
         });
     }
@@ -140,6 +159,18 @@ public class ProductController {
         }
         p.setCategory((Category) view.getCbCategory().getSelectedItem());
         p.setBrand((Brand) view.getCbBrand().getSelectedItem());
+        
+        String dateStr = view.getTxtExpirationDate().getText().trim();
+        if (!dateStr.isEmpty()) {
+            try {
+                SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+                sdf.setLenient(false);
+                p.setExpirationDate(sdf.parse(dateStr));
+            } catch (Exception e) {
+                throw new Exception("Định dạng Hạn SD không hợp lệ (Phải là dd/MM/yyyy)!");
+            }
+        }
+        
         return p;
     }
 
@@ -148,6 +179,9 @@ public class ProductController {
         view.getTxtName().setText("");
         view.getTxtPrice().setText("");
         view.getTxtQuantity().setText("");
+        view.getTxtExpirationDate().setText("");
+        view.getTxtSearch().setText("");
         view.getTable().clearSelection();
+        loadTable(productService.getAllProducts());
     }
 }

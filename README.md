@@ -48,10 +48,13 @@ Kế thừa toàn bộ quyền hạn của Staff, đồng thời bổ sung các 
 
 ### 🌟 Tính năng Nâng cao
 Hệ thống được tích hợp thêm các tính năng nâng cao nhằm tối ưu hóa trải nghiệm người dùng:
-* **Giao diện Tùy biến (Dark Mode):** Hỗ trợ bật/tắt chế độ Sáng/Tối linh hoạt, giúp bảo vệ mắt và mang lại giao diện hiện đại.
-* **Tích hợp Email:** Hệ thống tự động gửi thông báo qua Email (Hỗ trợ gửi hóa đơn điện tử cho khách hàng hoặc cấp lại mật khẩu).
-* **Trích xuất Dữ liệu (Export):** Cho phép xuất hóa đơn mua hàng và các báo cáo thống kê doanh thu ra định dạng **PDF** và **Excel**.
-* **Biểu đồ Trực quan:** Sử dụng biểu đồ để minh họa dữ liệu doanh thu trực quan, sinh động.
+* **Tích Lũy Điểm Khách Hàng (Loyalty Points):** Hệ thống thông minh tự động cộng điểm cho người mua (1 điểm = 100.000đ) và cho phép dùng điểm để giảm giá trực tiếp vào các lần mua sau.
+* **Quản Lý Hạn Sử Dụng (Expiration Date):** Hệ thống tự động kiểm tra chuyên sâu HSD của hóa mỹ phẩm. Hiển thị Bảng cảnh báo đỏ tại Nhựa điều khiển (Dashboard) và Bật Popup báo động tức thì chặn thu ngân bán hàng hết date.
+* **Tìm Kiếm & Bộ Lọc Đa Năng:** Giao diện tích hợp thanh tìm kiếm đồng bộ trên mọi ngóc ngách của phần mềm (Sản phẩm, Khách hàng, Thương hiệu, Nhà cung cấp).
+* **Giao diện Tùy biến (Dark Mode):** Hỗ trợ bật/tắt chế độ Sáng/Tối linh hoạt, giúp bảo vệ mắt và mang lại giao diện hiện đại thông qua thư viện FlatLaf.
+* **Tích hợp Email:** Hệ thống tự động gửi thông báo qua Email (Gửi thẳng file Hóa Đơn điện tử đuôi PDF cho khách hàng sau khi thanh toán).
+* **Trích xuất Dữ liệu (Export):** Cho phép xuất hóa đơn mua hàng và lưu các loại báo cáo doanh thu ra định dạng **PDF** và **Excel**.
+* **Biểu đồ Trực quan:** Ứng dụng JFreeChart để vẽ trực tiếp biểu đồ minh họa Top Doanh Thu cực kỳ trực quan.
 
 ---
 

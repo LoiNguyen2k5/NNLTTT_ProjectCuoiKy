@@ -13,4 +13,5 @@ public class StatisticsServiceImpl implements StatisticsService {
     @Override public BigDecimal getTodayRevenue() { return repo.getTodayRevenue(); }
     @Override public BigDecimal getTotalRevenue() { return repo.getTotalRevenue(); } // Bổ sung
     @Override public List<Object[]> getTopSellingProducts() { return repo.getTopSellingProducts(); }
+    @Override public List<Object[]> getExpiringProducts(int daysThreshold) { return repo.getExpiringProducts(daysThreshold); }
 }

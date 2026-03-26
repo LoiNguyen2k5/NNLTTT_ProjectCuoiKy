@@ -41,6 +41,17 @@ public class StatisticsController {
             view.getLblTodayRevenue().setText(df.format(service.getTodayRevenue()) + " đ");
             view.getLblTotalRevenue().setText(df.format(service.getTotalRevenue()) + " đ");
 
+            // Xử lý Cảnh báo Hết hạn
+            List<Object[]> expiringList = service.getExpiringProducts(30);
+            view.getLblExpiringSoon().setText(String.valueOf(expiringList.size()));
+            view.getExpiringModel().setRowCount(0);
+            for (Object[] row : expiringList) {
+                String name = (String) row[0];
+                int quantity = (Integer) row[1];
+                Date expDate = (Date) row[2];
+                view.getExpiringModel().addRow(new Object[]{name, quantity, sdf.format(expDate)});
+            }
+
             view.getTableModel().setRowCount(0);
             List<Object[]> topProducts = service.getTopSellingProducts();
             DefaultCategoryDataset dataset = new DefaultCategoryDataset(); 
