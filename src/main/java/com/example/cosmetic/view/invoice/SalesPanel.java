@@ -16,6 +16,9 @@ public class SalesPanel extends JPanel {
     private DefaultTableModel cartModel;
     private JTextField txtTotal;
     private JCheckBox chkUsePoints;
+    private JTextField txtVoucherCode;
+    private JButton btnApplyVoucher;
+    private JLabel lblVoucherStatus;
     private JButton btnCheckout;
 
     public SalesPanel() {
@@ -57,6 +60,18 @@ public class SalesPanel extends JPanel {
         JPanel pnlBottom = new JPanel(new BorderLayout());
         pnlBottom.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
 
+        JPanel pnlTotalContainer = new JPanel(new GridLayout(2, 1));
+
+        JPanel pnlVoucher = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        pnlVoucher.add(new JLabel("Mã Voucher:"));
+        txtVoucherCode = new JTextField(10);
+        pnlVoucher.add(txtVoucherCode);
+        btnApplyVoucher = new JButton("Áp dụng Mã");
+        pnlVoucher.add(btnApplyVoucher);
+        lblVoucherStatus = new JLabel("");
+        lblVoucherStatus.setForeground(new Color(0, 150, 0));
+        pnlVoucher.add(lblVoucherStatus);
+
         JPanel pnlTotal = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         chkUsePoints = new JCheckBox("Dùng điểm giảm giá");
         pnlTotal.add(chkUsePoints);
@@ -74,7 +89,10 @@ public class SalesPanel extends JPanel {
         btnCheckout.setForeground(Color.WHITE);
         btnCheckout.setPreferredSize(new Dimension(300, 40));
 
-        pnlBottom.add(pnlTotal, BorderLayout.NORTH);
+        pnlTotalContainer.add(pnlVoucher);
+        pnlTotalContainer.add(pnlTotal);
+
+        pnlBottom.add(pnlTotalContainer, BorderLayout.NORTH);
         pnlBottom.add(btnCheckout, BorderLayout.CENTER);
 
         add(pnlBottom, BorderLayout.SOUTH);
@@ -89,5 +107,8 @@ public class SalesPanel extends JPanel {
     public DefaultTableModel getCartModel() { return cartModel; }
     public JTextField getTxtTotal() { return txtTotal; }
     public JCheckBox getChkUsePoints() { return chkUsePoints; }
+    public JTextField getTxtVoucherCode() { return txtVoucherCode; }
+    public JButton getBtnApplyVoucher() { return btnApplyVoucher; }
+    public JLabel getLblVoucherStatus() { return lblVoucherStatus; }
     public JButton getBtnCheckout() { return btnCheckout; }
 }

@@ -17,6 +17,7 @@
         <class>com.example.cosmetic.model.entity.ImportReceiptDetail</class>
         <class>com.example.cosmetic.model.entity.Invoice</class>
         <class>com.example.cosmetic.model.entity.InvoiceDetail</class>
+        <class>com.example.cosmetic.model.entity.Promotion</class>
 
         <properties>
             <property name="jakarta.persistence.jdbc.driver" value="com.mysql.cj.jdbc.Driver"/>

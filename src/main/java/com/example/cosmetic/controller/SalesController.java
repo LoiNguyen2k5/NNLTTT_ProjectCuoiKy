@@ -20,13 +20,17 @@ public class SalesController {
     private final ProductService productService;
     private final CustomerService customerService;
     private final InvoiceService invoiceService;
+    private final PromotionService promotionService;
     private final Staff currentStaff;
+    
+    private Promotion appliedPromotion = null;
 
-    public SalesController(SalesPanel view, ProductService ps, CustomerService cs, InvoiceService is, Staff staff) {
+    public SalesController(SalesPanel view, ProductService ps, CustomerService cs, InvoiceService is, PromotionService promoService, Staff staff) {
         this.view = view;
         this.productService = ps;
         this.customerService = cs;
         this.invoiceService = is;
+        this.promotionService = promoService;
         this.currentStaff = staff;
 
         loadInitialData();
@@ -46,6 +50,7 @@ public class SalesController {
         view.getBtnCheckout().addActionListener(e -> processCheckout());
         view.getCbCustomer().addActionListener(e -> updateCustomerPointsInfo());
         view.getChkUsePoints().addActionListener(e -> calculateTotal());
+        view.getBtnApplyVoucher().addActionListener(e -> applyVoucher());
     }
 
     private void updateCustomerPointsInfo() {
@@ -118,12 +123,53 @@ public class SalesController {
         calculateTotal();
     }
 
+    private void applyVoucher() {
+        String code = view.getTxtVoucherCode().getText().trim().toUpperCase();
+        if (code.isEmpty()) {
+            appliedPromotion = null;
+            view.getLblVoucherStatus().setText("");
+            calculateTotal();
+            return;
+        }
+        
+        try {
+            // Validate code via service
+            BigDecimal grandTotalBase = BigDecimal.ZERO;
+            for (int i = 0; i < view.getCartModel().getRowCount(); i++) {
+                grandTotalBase = grandTotalBase.add((BigDecimal) view.getCartModel().getValueAt(i, 5));
+            }
+            
+            BigDecimal discount = promotionService.calculateDiscount(code, grandTotalBase);
+            appliedPromotion = promotionService.getPromotionByCode(code);
+            view.getLblVoucherStatus().setForeground(new java.awt.Color(0, 150, 0));
+            view.getLblVoucherStatus().setText("Áp dụng thành công! Giảm: " + new DecimalFormat("#,###").format(discount) + "VND");
+            calculateTotal();
+        } catch (Exception ex) {
+            appliedPromotion = null;
+            view.getLblVoucherStatus().setForeground(java.awt.Color.RED);
+            view.getLblVoucherStatus().setText(ex.getMessage());
+            calculateTotal();
+        }
+    }
+
     private void calculateTotal() {
         BigDecimal grandTotal = BigDecimal.ZERO;
         for (int i = 0; i < view.getCartModel().getRowCount(); i++) {
             grandTotal = grandTotal.add((BigDecimal) view.getCartModel().getValueAt(i, 5));
         }
         
+        // Trừ Voucher trước
+        if (appliedPromotion != null) {
+            try {
+                BigDecimal discount = promotionService.calculateDiscount(appliedPromotion.getCode(), grandTotal);
+                grandTotal = grandTotal.subtract(discount);
+                if (grandTotal.compareTo(BigDecimal.ZERO) < 0) grandTotal = BigDecimal.ZERO;
+            } catch (Exception e) {
+                // Ignore, handled by applyVoucher
+            }
+        }
+        
+        // Trừ điểm thưởng
         if (view.getChkUsePoints().isSelected()) {
             Customer selectedCustomer = (Customer) view.getCbCustomer().getSelectedItem();
             if (selectedCustomer != null && selectedCustomer.getPoints() > 0) {
@@ -176,6 +222,15 @@ public class SalesController {
                 finalTotal = finalTotal.add((BigDecimal) view.getCartModel().getValueAt(i, 5));
             }
             
+            // Trừ Voucher trước tiên
+            if (appliedPromotion != null) {
+                try {
+                    BigDecimal promoDiscount = promotionService.calculateDiscount(appliedPromotion.getCode(), finalTotal);
+                    finalTotal = finalTotal.subtract(promoDiscount);
+                    if (finalTotal.compareTo(BigDecimal.ZERO) < 0) finalTotal = BigDecimal.ZERO;
+                } catch (Exception ignored) {}
+            }
+
             // Xử lý điểm tích lũy
             int pointsUsed = 0;
             if (view.getChkUsePoints().isSelected() && selectedCustomer.getPoints() > 0) {
@@ -233,6 +288,9 @@ public class SalesController {
             // 5. LÀM SẠCH GIỎ HÀNG SAU KHI XONG
             view.getCartModel().setRowCount(0);
             view.getTxtTotal().setText("0");
+            view.getTxtVoucherCode().setText("");
+            view.getLblVoucherStatus().setText("");
+            appliedPromotion = null;
 
         } catch (Exception ex) {
             ex.printStackTrace();

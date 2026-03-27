@@ -30,14 +30,17 @@ public class ProductManagementPanel extends JPanel {
         panelForm.add(new JLabel("Thương hiệu:")); cbBrand = new JComboBox<>(); panelForm.add(cbBrand);
 
         JPanel panelButtons = new JPanel(new FlowLayout());
-        btnAdd = new JButton("Thêm"); btnUpdate = new JButton("Sửa"); btnDelete = new JButton("Xóa"); btnClear = new JButton("Làm mới");
+        btnAdd = createStyledButton("Thêm", new Color(40, 167, 69)); 
+        btnUpdate = createStyledButton("Sửa", new Color(0, 123, 255)); 
+        btnDelete = createStyledButton("Xóa", new Color(220, 53, 69)); 
+        btnClear = createStyledButton("Làm mới", new Color(108, 117, 125));
         panelButtons.add(btnAdd); panelButtons.add(btnUpdate); panelButtons.add(btnDelete); panelButtons.add(btnClear);
 
         // Thanh tìm kiếm
         JPanel panelSearch = new JPanel(new FlowLayout(FlowLayout.LEFT));
         panelSearch.add(new JLabel("Tìm kiếm (Tên sản phẩm):"));
         txtSearch = new JTextField(20);
-        btnSearch = new JButton("Tìm kiếm");
+        btnSearch = createStyledButton("Tìm kiếm", new Color(23, 162, 184));
         panelSearch.add(txtSearch);
         panelSearch.add(btnSearch);
 
@@ -50,6 +53,17 @@ public class ProductManagementPanel extends JPanel {
         tableModel = new DefaultTableModel(new String[]{"ID", "Barcode", "Tên", "Giá", "Kho", "Loại", "Thương hiệu", "Hạn SD"}, 0);
         table = new JTable(tableModel);
         add(new JScrollPane(table), BorderLayout.CENTER);
+    }
+
+    private JButton createStyledButton(String text, Color bgColor) {
+        JButton button = new JButton(text);
+        button.setFont(new Font("Arial", Font.BOLD, 13));
+        button.setForeground(Color.WHITE);
+        button.setBackground(bgColor);
+        button.setFocusPainted(false);
+        button.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
+        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        return button;
     }
 
     // Getters

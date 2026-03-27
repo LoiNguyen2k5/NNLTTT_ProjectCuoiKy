@@ -34,10 +34,10 @@ public class SupplierManagementPanel extends JPanel {
         panelForm.add(txtAddress);
 
         JPanel panelButtons = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        btnAdd = new JButton("Thêm");
-        btnUpdate = new JButton("Sửa");
-        btnDelete = new JButton("Xóa");
-        btnClear = new JButton("Làm mới");
+        btnAdd = createStyledButton("Thêm", new Color(40, 167, 69));
+        btnUpdate = createStyledButton("Sửa", new Color(0, 123, 255));
+        btnDelete = createStyledButton("Xóa", new Color(220, 53, 69));
+        btnClear = createStyledButton("Làm mới", new Color(108, 117, 125));
 
         panelButtons.add(btnAdd);
         panelButtons.add(btnUpdate);
@@ -53,7 +53,7 @@ public class SupplierManagementPanel extends JPanel {
         JPanel panelSearch = new JPanel(new FlowLayout(FlowLayout.LEFT));
         panelSearch.add(new JLabel("Tìm kiếm (Tên/SĐT/Địa chỉ): "));
         txtSearch = new JTextField(25);
-        btnSearch = new JButton("Tìm kiếm");
+        btnSearch = createStyledButton("Tìm kiếm", new Color(23, 162, 184));
         panelSearch.add(txtSearch);
         panelSearch.add(btnSearch);
 
@@ -72,6 +72,17 @@ public class SupplierManagementPanel extends JPanel {
         panelCenter.add(scrollPane, BorderLayout.CENTER);
         
         add(panelCenter, BorderLayout.CENTER);
+    }
+
+    private JButton createStyledButton(String text, Color bgColor) {
+        JButton button = new JButton(text);
+        button.setFont(new Font("Arial", Font.BOLD, 13));
+        button.setForeground(Color.WHITE);
+        button.setBackground(bgColor);
+        button.setFocusPainted(false);
+        button.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
+        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        return button;
     }
 
     public JTextField getTxtId() { return txtId; }

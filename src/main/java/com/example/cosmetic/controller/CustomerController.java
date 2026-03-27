@@ -33,7 +33,7 @@ public class CustomerController {
         view.getTableModel().setRowCount(0);
         if (list != null) {
             list.forEach(c -> view.getTableModel().addRow(new Object[]{
-                c.getId(), c.getFullName(), c.getPhoneNumber(), c.getGender().toString()
+                c.getId(), c.getFullName(), c.getPhoneNumber(), c.getPoints(), c.getGender().toString()
             }));
         }
     }
@@ -46,8 +46,9 @@ public class CustomerController {
                 if (row != -1) {
                     view.getTxtFullName().setText(view.getTable().getValueAt(row, 1).toString());
                     view.getTxtPhone().setText(view.getTable().getValueAt(row, 2).toString());
+                    view.getTxtPoints().setText(view.getTable().getValueAt(row, 3).toString());
                     
-                    String genderStr = view.getTable().getValueAt(row, 3).toString();
+                    String genderStr = view.getTable().getValueAt(row, 4).toString();
                     for (int i = 0; i < view.getCbGender().getItemCount(); i++) {
                         if (view.getCbGender().getItemAt(i).toString().equals(genderStr)) {
                             view.getCbGender().setSelectedIndex(i);
@@ -124,6 +125,7 @@ public class CustomerController {
     private void clearForm() {
         view.getTxtFullName().setText("");
         view.getTxtPhone().setText("");
+        view.getTxtPoints().setText("");
         view.getCbGender().setSelectedIndex(0);
         view.getTxtSearch().setText("");
         view.getTable().clearSelection();

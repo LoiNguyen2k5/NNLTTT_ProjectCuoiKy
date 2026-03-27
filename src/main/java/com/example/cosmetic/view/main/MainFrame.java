@@ -9,12 +9,14 @@ import com.example.cosmetic.view.category.CategoryManagementPanel;
 import com.example.cosmetic.view.brand.BrandManagementPanel;
 import com.example.cosmetic.view.supplier.SupplierManagementPanel;
 import com.example.cosmetic.view.product.ProductManagementPanel;
+import com.example.cosmetic.view.promotion.PromotionManagementPanel;
 import com.example.cosmetic.view.customer.CustomerManagementPanel;
 import com.example.cosmetic.view.invoice.SalesPanel;
 import com.example.cosmetic.view.invoice.InvoiceManagementPanel;
 import com.example.cosmetic.view.invoice.ImportPanel;
 import com.example.cosmetic.view.invoice.ImportHistoryPanel;
 import com.example.cosmetic.view.statistics.StatisticsPanel;
+import com.example.cosmetic.view.dashboard.DashboardPanel;
 import com.example.cosmetic.view.staff.StaffManagementPanel;
 import com.example.cosmetic.controller.*;
 import com.example.cosmetic.view.utils.DatabaseBackupUtil;
@@ -42,17 +44,20 @@ public class MainFrame extends JFrame {
         setLayout(new BorderLayout());
 
         centerPanel = new JPanel(new BorderLayout());
-        JLabel lblWelcome = new JLabel("CHÀO MỪNG BẠN ĐẾN VỚI HỆ THỐNG (" + currentStaff.getRole() + ")", SwingConstants.CENTER);
-        lblWelcome.setFont(new Font("Arial", Font.BOLD, 24));
-        lblWelcome.setForeground(new Color(50, 150, 250));
-        centerPanel.add(lblWelcome, BorderLayout.CENTER);
-
         add(centerPanel, BorderLayout.CENTER);
         setupMenuBasedOnRole();
+        
+        // Mở Dashboard mặc định
+        openDashboard();
     }
 
     private void setupMenuBasedOnRole() {
         JMenuBar menuBar = new JMenuBar();
+        
+        // 0. Menu Trang Chủ
+        JMenu menuHome = new JMenu("Trang Chủ");
+        JMenuItem itemHome = new JMenuItem("Bảng Điều Khiển");
+        menuHome.add(itemHome);
         
         // 1. Menu Bán Hàng
         JMenu menuSales = new JMenu("Bán Hàng");
@@ -74,12 +79,14 @@ public class MainFrame extends JFrame {
         JMenuItem itemBrand = new JMenuItem("Thương Hiệu");
         JMenuItem itemSupplier = new JMenuItem("Nhà Cung Cấp");
         JMenuItem itemCustomer = new JMenuItem("Khách Hàng");
+        JMenuItem itemPromotion = new JMenuItem("Mã Khuyến Mãi");
         JMenuItem itemProduct = new JMenuItem("Sản Phẩm");
 
         menuCatalog.add(itemCategory);
         menuCatalog.add(itemBrand);
         menuCatalog.add(itemSupplier);
         menuCatalog.add(itemCustomer); 
+        menuCatalog.add(itemPromotion);
         menuCatalog.addSeparator(); 
         menuCatalog.add(itemProduct);
 
@@ -116,6 +123,7 @@ public class MainFrame extends JFrame {
         menuView.add(itemDarkMode);
 
         // Thêm các Menu chính vào MenuBar
+        menuBar.add(menuHome);
         menuBar.add(menuSales);
         menuBar.add(menuKho);
         menuBar.add(menuCatalog);
@@ -132,6 +140,7 @@ public class MainFrame extends JFrame {
         setJMenuBar(menuBar);
 
         // --- Gắn sự kiện click mở Panel ---
+        itemHome.addActionListener(e -> openDashboard());
         itemSales.addActionListener(e -> openSales());
         itemInvoiceHistory.addActionListener(e -> openInvoiceHistory());
         
@@ -142,6 +151,7 @@ public class MainFrame extends JFrame {
         itemBrand.addActionListener(e -> openBrandManagement());
         itemSupplier.addActionListener(e -> openSupplierManagement());
         itemCustomer.addActionListener(e -> openCustomerManagement());
+        itemPromotion.addActionListener(e -> openPromotionManagement());
         itemProduct.addActionListener(e -> openProductManagement());
         
         itemStats.addActionListener(e -> openStatistics());
@@ -160,6 +170,14 @@ public class MainFrame extends JFrame {
     // CÁC HÀM MỞ GIAO DIỆN CHỨC NĂNG (CHUẨN MVC)
     // =========================================================
 
+    private void openDashboard() {
+        StatisticsRepositoryImpl repo = new StatisticsRepositoryImpl();
+        StatisticsServiceImpl service = new StatisticsServiceImpl(repo);
+        DashboardPanel view = new DashboardPanel();
+        new DashboardController(view, service);
+        switchPanel(view);
+    }
+
     private void openSales() {
         try {
             ProductRepositoryImpl pRepo = new ProductRepositoryImpl();
@@ -169,9 +187,10 @@ public class MainFrame extends JFrame {
             ProductServiceImpl pService = new ProductServiceImpl(pRepo);
             CustomerServiceImpl cService = new CustomerServiceImpl(cRepo);
             InvoiceServiceImpl iService = new InvoiceServiceImpl(iRepo);
+            PromotionServiceImpl promoService = new PromotionServiceImpl(new PromotionRepositoryImpl());
 
             SalesPanel view = new SalesPanel();
-            new SalesController(view, pService, cService, iService, currentStaff);
+            new SalesController(view, pService, cService, iService, promoService, currentStaff);
             switchPanel(view);
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this, "Lỗi: " + e.getMessage());
@@ -241,6 +260,14 @@ public class MainFrame extends JFrame {
         CustomerServiceImpl service = new CustomerServiceImpl(repo);
         CustomerManagementPanel view = new CustomerManagementPanel();
         new CustomerController(service, view, currentStaff);
+        switchPanel(view);
+    }
+
+    private void openPromotionManagement() {
+        PromotionRepositoryImpl repo = new PromotionRepositoryImpl();
+        PromotionServiceImpl service = new PromotionServiceImpl(repo);
+        PromotionManagementPanel view = new PromotionManagementPanel();
+        new PromotionController(service, view, currentStaff);
         switchPanel(view);
     }
  

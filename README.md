@@ -42,14 +42,16 @@ Kế thừa toàn bộ quyền hạn của Staff, đồng thời bổ sung các 
 * **Quản lý Nhân sự:** Thêm, sửa, xóa tài khoản và phân quyền cho nhân viên.
 * **Kiểm soát Hệ thống:**
   * Quản lý chuyên sâu danh mục Sản phẩm, Thương hiệu, Nhà cung cấp.
-* **Dashboard & Thống kê:**
-  * Xem tổng quan doanh thu, số lượng đơn hàng bán ra.
-  * Thống kê top các sản phẩm bán chạy nhất trong tháng.
+* **Dashboard Trực quan & Thống kê:**
+  * Bảng điều khiển (Dashboard) hiển thị chi tiết và trực quan biểu đồ doanh thu, tổng số đơn hàng, và lượng khách hàng.
+  * Thống kê top nhân viên xuất sắc và top sản phẩm bán chạy nhất trong tháng.
+  * Theo dõi cảnh báo tồn kho và cảnh báo sản phẩm sắp hết hạn ngay trên giao diện chính.
 
 ### 🌟 Tính năng Nâng cao
 Hệ thống được tích hợp thêm các tính năng nâng cao nhằm tối ưu hóa trải nghiệm người dùng:
+* **Hệ Thống Mã Khuyến Mãi (Promotion/Voucher):** Quản lý linh hoạt các chương trình khuyến mãi, mã giảm giá (theo % hoặc số tiền cụ thể). Tự động tính toán và kiểm tra điều kiện áp dụng mã ngay tại quầy thu ngân.
 * **Tích Lũy Điểm Khách Hàng (Loyalty Points):** Hệ thống thông minh tự động cộng điểm cho người mua (1 điểm = 100.000đ) và cho phép dùng điểm để giảm giá trực tiếp vào các lần mua sau.
-* **Quản Lý Hạn Sử Dụng (Expiration Date):** Hệ thống tự động kiểm tra chuyên sâu HSD của hóa mỹ phẩm. Hiển thị Bảng cảnh báo đỏ tại Nhựa điều khiển (Dashboard) và Bật Popup báo động tức thì chặn thu ngân bán hàng hết date.
+* **Quản Lý Hạn Sử Dụng (Expiration Date):** Hệ thống tự động kiểm tra chuyên sâu HSD của hóa mỹ phẩm. Hiển thị thông báo ngay tại Bảng điều khiển (Dashboard) và bật Popup cảnh báo tức thì, ngăn chặn xuất bán hàng lỗi/hết date.
 * **Tìm Kiếm & Bộ Lọc Đa Năng:** Giao diện tích hợp thanh tìm kiếm đồng bộ trên mọi ngóc ngách của phần mềm (Sản phẩm, Khách hàng, Thương hiệu, Nhà cung cấp).
 * **Giao diện Tùy biến (Dark Mode):** Hỗ trợ bật/tắt chế độ Sáng/Tối linh hoạt, giúp bảo vệ mắt và mang lại giao diện hiện đại thông qua thư viện FlatLaf.
 * **Tích hợp Email:** Hệ thống tự động gửi thông báo qua Email (Gửi thẳng file Hóa Đơn điện tử đuôi PDF cho khách hàng sau khi thanh toán).
