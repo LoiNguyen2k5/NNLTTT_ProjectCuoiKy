@@ -20,9 +20,7 @@ import com.example.cosmetic.view.dashboard.DashboardPanel;
 import com.example.cosmetic.view.staff.StaffManagementPanel;
 import com.example.cosmetic.controller.*;
 import com.example.cosmetic.view.utils.DatabaseBackupUtil;
-
-import com.formdev.flatlaf.FlatDarkLaf;
-import com.formdev.flatlaf.FlatLightLaf;
+import com.example.cosmetic.view.utils.UITheme;
 
 import javax.swing.*;
 import java.awt.*;
@@ -32,142 +30,94 @@ import java.util.Date;
 
 public class MainFrame extends JFrame {
     private Staff currentStaff;
-    private JPanel centerPanel; 
+    private JPanel contentArea;
+    private ModernSidebar sidebar;
+    private ModernHeader header;
 
     public MainFrame(Staff currentStaff) {
         this.currentStaff = currentStaff;
-        
+
         setTitle("Hệ thống Quản lý Cửa hàng Mỹ phẩm - " + currentStaff.getFullName());
-        setSize(1200, 800);
+        setSize(1280, 800);
+        setMinimumSize(new Dimension(1100, 650));
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
+        getContentPane().setBackground(UITheme.getBgColor());
 
-        centerPanel = new JPanel(new BorderLayout());
-        add(centerPanel, BorderLayout.CENTER);
-        setupMenuBasedOnRole();
-        
+        // --- SIDEBAR (bên trái) ---
+        sidebar = new ModernSidebar(currentStaff.getRole());
+        add(sidebar, BorderLayout.WEST);
+
+        // --- RIGHT PANEL: Header + Content ---
+        JPanel rightPanel = new JPanel(new BorderLayout());
+        rightPanel.setBackground(UITheme.getBgColor());
+
+        // Header
+        header = new ModernHeader(currentStaff);
+        rightPanel.add(header, BorderLayout.NORTH);
+
+        // Content area
+        contentArea = new JPanel(new BorderLayout());
+        contentArea.setBackground(UITheme.getBgColor());
+        rightPanel.add(contentArea, BorderLayout.CENTER);
+
+        add(rightPanel, BorderLayout.CENTER);
+
+        // Gắn sự kiện điều hướng từ sidebar
+        sidebar.setNavigationListener(destination -> {
+            handleNavigation(destination);
+        });
+
+        // Dark/Light mode toggle callback
+        header.setOnThemeToggle(() -> applyThemeToFrame());
+
         // Mở Dashboard mặc định
         openDashboard();
     }
 
-    private void setupMenuBasedOnRole() {
-        JMenuBar menuBar = new JMenuBar();
-        
-        // 0. Menu Trang Chủ
-        JMenu menuHome = new JMenu("Trang Chủ");
-        JMenuItem itemHome = new JMenuItem("Bảng Điều Khiển");
-        menuHome.add(itemHome);
-        
-        // 1. Menu Bán Hàng
-        JMenu menuSales = new JMenu("Bán Hàng");
-        JMenuItem itemSales = new JMenuItem("Lập Hóa Đơn");
-        JMenuItem itemInvoiceHistory = new JMenuItem("Lịch Sử Hóa Đơn");
-        menuSales.add(itemSales);
-        menuSales.add(itemInvoiceHistory);
-        
-        // 2. Menu Quản Lý Kho
-        JMenu menuKho = new JMenu("Quản Lý Kho");
-        JMenuItem itemImport = new JMenuItem("Nhập Kho (Import)");
-        JMenuItem itemImportHistory = new JMenuItem("Lịch Sử Nhập Kho");
-        menuKho.add(itemImport);
-        menuKho.add(itemImportHistory);
-
-        // 3. Menu Danh Mục
-        JMenu menuCatalog = new JMenu("Danh Mục");
-        JMenuItem itemCategory = new JMenuItem("Loại Mỹ Phẩm");
-        JMenuItem itemBrand = new JMenuItem("Thương Hiệu");
-        JMenuItem itemSupplier = new JMenuItem("Nhà Cung Cấp");
-        JMenuItem itemCustomer = new JMenuItem("Khách Hàng");
-        JMenuItem itemPromotion = new JMenuItem("Mã Khuyến Mãi");
-        JMenuItem itemProduct = new JMenuItem("Sản Phẩm");
-
-        menuCatalog.add(itemCategory);
-        menuCatalog.add(itemBrand);
-        menuCatalog.add(itemSupplier);
-        menuCatalog.add(itemCustomer); 
-        menuCatalog.add(itemPromotion);
-        menuCatalog.addSeparator(); 
-        menuCatalog.add(itemProduct);
-
-        // 4. Menu Thống Kê
-        JMenu menuStats = new JMenu("Thống Kê");
-        JMenuItem itemStats = new JMenuItem("Xem Thống Kê Báo Cáo");
-        menuStats.add(itemStats);
-
-        // 5. Menu Hệ Thống (Admin)
-        JMenu menuSystem = new JMenu("Hệ Thống");
-        JMenuItem itemStaff = new JMenuItem("Quản lý Nhân Viên");
-        JMenuItem itemBackup = new JMenuItem("Sao lưu dữ liệu (Backup DB)");
-        
-        menuSystem.add(itemStaff);
-        menuSystem.addSeparator();
-        menuSystem.add(itemBackup);
-
-        // 6. Menu Giao Diện (Thanh gạt Dark Mode)
-        JMenu menuView = new JMenu("Giao Diện");
-        JCheckBoxMenuItem itemDarkMode = new JCheckBoxMenuItem("Chế độ Tối (Dark Mode)");
-        
-        itemDarkMode.addActionListener(e -> {
-            try {
-                if (itemDarkMode.isSelected()) {
-                    UIManager.setLookAndFeel(new FlatDarkLaf());
-                } else {
-                    UIManager.setLookAndFeel(new FlatLightLaf());
-                }
-                SwingUtilities.updateComponentTreeUI(this);
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
+    /**
+     * Dark/Light mode: Cach duy nhat de doi theme trong Swing o-style la rebuild lai toan bo frame.
+     * Cac panel su dung mau tu UITheme o thoi diem construction, nen can tao moi.
+     */
+    private void applyThemeToFrame() {
+        // UITheme.isDark da duoc toggle o header
+        Staff staffRef = this.currentStaff;
+        SwingUtilities.invokeLater(() -> {
+            MainFrame newFrame = new MainFrame(staffRef);
+            newFrame.setVisible(true);
         });
-        menuView.add(itemDarkMode);
+        dispose(); // dong frame cu
+    }
 
-        // Thêm các Menu chính vào MenuBar
-        menuBar.add(menuHome);
-        menuBar.add(menuSales);
-        menuBar.add(menuKho);
-        menuBar.add(menuCatalog);
-        menuBar.add(menuStats);
-        menuBar.add(menuView);
-
-        // Phân quyền hiển thị Menu
-        if (currentStaff.getRole() == StaffRole.STAFF) {
-            menuStats.setVisible(false); // Staff không xem được thống kê
-        } else {
-            menuBar.add(menuSystem);     // Admin mới thấy menu Hệ thống
+    private void handleNavigation(String destination) {
+        switch (destination) {
+            case "DASHBOARD":       openDashboard();            header.setPageTitle("Trang Chủ"); break;
+            case "SALES":           openSales();                header.setPageTitle("Bán Hàng › Lập Hóa Đơn"); break;
+            case "INVOICE_HISTORY": openInvoiceHistory();       header.setPageTitle("Bán Hàng › Lịch Sử Hóa Đơn"); break;
+            case "IMPORT":          openImportPanel();          header.setPageTitle("Quản Lý Kho › Nhập Kho"); break;
+            case "IMPORT_HISTORY":  openImportHistoryPanel();   header.setPageTitle("Quản Lý Kho › Lịch Sử Nhập Kho"); break;
+            case "CUSTOMER":        openCustomerManagement();   header.setPageTitle("Khách Hàng"); break;
+            case "PRODUCT":         openProductManagement();    header.setPageTitle("Danh Mục › Sản Phẩm"); break;
+            case "CATEGORY":        openCategoryManagement();   header.setPageTitle("Danh Mục › Loại Mỹ Phẩm"); break;
+            case "BRAND":           openBrandManagement();      header.setPageTitle("Danh Mục › Thương Hiệu"); break;
+            case "SUPPLIER":        openSupplierManagement();   header.setPageTitle("Danh Mục › Nhà Cung Cấp"); break;
+            case "PROMOTION":       openPromotionManagement();  header.setPageTitle("Danh Mục › Mã Khuyến Mãi"); break;
+            case "STATISTICS":      openStatistics();           header.setPageTitle("Thống Kê"); break;
+            case "STAFF":           openStaffManagement();      header.setPageTitle("Hệ Thống › Quản Lý Nhân Viên"); break;
+            case "BACKUP":          openDatabaseBackup();       header.setPageTitle("Hệ Thống › Backup Database"); break;
         }
-
-        setJMenuBar(menuBar);
-
-        // --- Gắn sự kiện click mở Panel ---
-        itemHome.addActionListener(e -> openDashboard());
-        itemSales.addActionListener(e -> openSales());
-        itemInvoiceHistory.addActionListener(e -> openInvoiceHistory());
-        
-        itemImport.addActionListener(e -> openImportPanel());
-        itemImportHistory.addActionListener(e -> openImportHistoryPanel());
-        
-        itemCategory.addActionListener(e -> openCategoryManagement());
-        itemBrand.addActionListener(e -> openBrandManagement());
-        itemSupplier.addActionListener(e -> openSupplierManagement());
-        itemCustomer.addActionListener(e -> openCustomerManagement());
-        itemPromotion.addActionListener(e -> openPromotionManagement());
-        itemProduct.addActionListener(e -> openProductManagement());
-        
-        itemStats.addActionListener(e -> openStatistics());
-        itemBackup.addActionListener(e -> performDatabaseBackup());
-        itemStaff.addActionListener(e -> openStaffManagement()); 
     }
 
     private void switchPanel(JPanel newPanel) {
-        centerPanel.removeAll();
-        centerPanel.add(newPanel, BorderLayout.CENTER);
-        centerPanel.revalidate();
-        centerPanel.repaint();
+        contentArea.removeAll();
+        contentArea.add(newPanel, BorderLayout.CENTER);
+        contentArea.revalidate();
+        contentArea.repaint();
     }
 
     // =========================================================
-    // CÁC HÀM MỞ GIAO DIỆN CHỨC NĂNG (CHUẨN MVC)
+    // CÁC HÀM MỞ GIAO DIỆN CHỨC NĂNG (CHUẨN MVC — KHÔNG ĐỔI)
     // =========================================================
 
     private void openDashboard() {
@@ -183,7 +133,7 @@ public class MainFrame extends JFrame {
             ProductRepositoryImpl pRepo = new ProductRepositoryImpl();
             CustomerRepositoryImpl cRepo = new CustomerRepositoryImpl();
             InvoiceRepositoryImpl iRepo = new InvoiceRepositoryImpl();
-            
+
             ProductServiceImpl pService = new ProductServiceImpl(pRepo);
             CustomerServiceImpl cService = new CustomerServiceImpl(cRepo);
             InvoiceServiceImpl iService = new InvoiceServiceImpl(iRepo);
@@ -210,11 +160,11 @@ public class MainFrame extends JFrame {
             ProductRepositoryImpl pRepo = new ProductRepositoryImpl();
             SupplierRepositoryImpl sRepo = new SupplierRepositoryImpl();
             ImportReceiptRepositoryImpl iRepo = new ImportReceiptRepositoryImpl();
-            
+
             ProductServiceImpl pService = new ProductServiceImpl(pRepo);
             SupplierServiceImpl sService = new SupplierServiceImpl(sRepo);
             ImportReceiptServiceImpl iService = new ImportReceiptServiceImpl(iRepo);
-            
+
             ImportPanel view = new ImportPanel();
             new ImportController(view, pService, sService, iService, currentStaff);
             switchPanel(view);
@@ -254,7 +204,7 @@ public class MainFrame extends JFrame {
         new SupplierController(service, view, currentStaff);
         switchPanel(view);
     }
-    
+
     private void openCustomerManagement() {
         CustomerRepositoryImpl repo = new CustomerRepositoryImpl();
         CustomerServiceImpl service = new CustomerServiceImpl(repo);
@@ -270,16 +220,16 @@ public class MainFrame extends JFrame {
         new PromotionController(service, view, currentStaff);
         switchPanel(view);
     }
- 
+
     private void openProductManagement() {
         ProductRepositoryImpl productRepo = new ProductRepositoryImpl();
         CategoryRepositoryImpl categoryRepo = new CategoryRepositoryImpl();
         BrandRepositoryImpl brandRepo = new BrandRepositoryImpl();
-        
+
         ProductServiceImpl productService = new ProductServiceImpl(productRepo);
         CategoryServiceImpl categoryService = new CategoryServiceImpl(categoryRepo);
         BrandServiceImpl brandService = new BrandServiceImpl(brandRepo);
-        
+
         ProductManagementPanel view = new ProductManagementPanel();
         new ProductController(productService, categoryService, brandService, view, currentStaff);
         switchPanel(view);
@@ -298,46 +248,69 @@ public class MainFrame extends JFrame {
             StaffRepositoryImpl repo = new StaffRepositoryImpl();
             StaffServiceImpl service = new StaffServiceImpl(repo);
             StaffManagementPanel view = new StaffManagementPanel();
-            
-            new StaffController(view, service); 
+            new StaffController(view, service);
             switchPanel(view);
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this, "Lỗi mở giao diện nhân viên: " + e.getMessage());
         }
     }
 
-    // =========================================================
-    // HÀM XỬ LÝ SAO LƯU DỮ LIỆU (BACKUP)
-    // =========================================================
-    private void performDatabaseBackup() {
-        JFileChooser fileChooser = new JFileChooser();
-        fileChooser.setDialogTitle("Chọn nơi lưu file Backup Database");
-        
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss");
-        String defaultFileName = "Cosmetic_Backup_" + sdf.format(new Date()) + ".sql";
-        fileChooser.setSelectedFile(new File(defaultFileName));
+    private void openDatabaseBackup() {
+        // Dialog chon thu muc luu
+        JFileChooser chooser = new JFileChooser();
+        chooser.setDialogTitle("Chọn nơi lưu file Backup");
+        chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        chooser.setAcceptAllFileFilterUsed(false);
 
-        int userSelection = fileChooser.showSaveDialog(this);
+        int result = chooser.showSaveDialog(this);
+        if (result != JFileChooser.APPROVE_OPTION) return;
 
-        if (userSelection == JFileChooser.APPROVE_OPTION) {
-            File fileToSave = fileChooser.getSelectedFile();
-            String savePath = fileToSave.getAbsolutePath();
+        // Tao ten file theo thoi gian
+        String timestamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String saveDir  = chooser.getSelectedFile().getAbsolutePath();
+        String savePath = saveDir + File.separator + "backup_cosmetics_" + timestamp + ".sql";
 
-            String dbUser = "root"; 
-            String dbPass = "123456"; // Đổi thành mật khẩu MySQL của bạn nếu cần
-            String dbName = "cosmetics_management";
+        // Hoi thong tin ket noi MySQL
+        String dbUser = JOptionPane.showInputDialog(this, "Nhập MySQL Username:", "root");
+        if (dbUser == null) return;
+        JPasswordField pwField = new JPasswordField();
+        int pwResult = JOptionPane.showConfirmDialog(this, pwField,
+                "Nhập MySQL Password (để trống nếu không có):",
+                JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+        if (pwResult != JOptionPane.OK_OPTION) return;
+        String dbPass = new String(pwField.getPassword());
 
-            boolean success = DatabaseBackupUtil.backup(dbUser, dbPass, dbName, savePath);
-
-            if (success) {
-                JOptionPane.showMessageDialog(this, 
-                    "Tuyệt vời! Đã sao lưu toàn bộ dữ liệu thành công tại:\n" + savePath, 
-                    "Thành công", JOptionPane.INFORMATION_MESSAGE);
-            } else {
-                JOptionPane.showMessageDialog(this, 
-                    "Lỗi sao lưu! \nNguyên nhân thường gặp: Máy tính chưa được cấu hình biến môi trường PATH cho thư mục 'bin' của MySQL.", 
-                    "Lỗi Backup", JOptionPane.ERROR_MESSAGE);
+        // Thuc hien backup tren thread rieng
+        SwingWorker<Boolean, Void> worker = new SwingWorker<>() {
+            @Override
+            protected Boolean doInBackground() throws Exception {
+                return DatabaseBackupUtil.backup(dbUser, dbPass, "cosmetics_management", savePath);
             }
-        }
+            @Override
+            protected void done() {
+                try {
+                    boolean ok = get();
+                    if (ok) {
+                        JOptionPane.showMessageDialog(MainFrame.this,
+                                "✅ Backup thành công!\nFile đã lưu tại:\n" + savePath,
+                                "Backup Database", JOptionPane.INFORMATION_MESSAGE);
+                    } else {
+                        JOptionPane.showMessageDialog(MainFrame.this,
+                                "❌ Backup thất bại! Hãy kiểm tra lại:\n" +
+                                "1. mysqldump đã được cài trong PATH chưa?\n" +
+                                "2. Username/Password MySQL có đúng không?\n" +
+                                "3. Database 'cosmetics_management' có tồn tại không?",
+                                "Backup Database", JOptionPane.ERROR_MESSAGE);
+                    }
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(MainFrame.this, "Lỗi: " + ex.getMessage());
+                }
+            }
+        };
+
+        JOptionPane.showMessageDialog(this,
+                "⏳ Đang thực hiện backup, vui lòng chờ...",
+                "Backup Database", JOptionPane.INFORMATION_MESSAGE);
+        worker.execute();
     }
 }

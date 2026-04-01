@@ -2,113 +2,201 @@ package com.example.cosmetic.view.invoice;
 
 import com.example.cosmetic.model.entity.Customer;
 import com.example.cosmetic.model.entity.Product;
+import com.example.cosmetic.view.utils.UITheme;
+
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 
 public class SalesPanel extends JPanel {
-    private JComboBox<Product> cbProduct;
-    private JTextField txtQuantity;
-    private JButton btnAddCart;
-    private JComboBox<Customer> cbCustomer; 
-    private JLabel lblCustomerPoints;
-    private JTable tableCart;
-    private DefaultTableModel cartModel;
-    private JTextField txtTotal;
-    private JCheckBox chkUsePoints;
-    private JTextField txtVoucherCode;
-    private JButton btnApplyVoucher;
-    private JLabel lblVoucherStatus;
-    private JButton btnCheckout;
+    private JComboBox<Product>   cbProduct;
+    private JTextField           txtQuantity;
+    private JButton              btnAddCart;
+    private JComboBox<Customer>  cbCustomer;
+    private JLabel               lblCustomerPoints;
+    private JTable               tableCart;
+    private DefaultTableModel    cartModel;
+    private JTextField           txtTotal;
+    private JCheckBox            chkUsePoints;
+    private JTextField           txtVoucherCode;
+    private JButton              btnApplyVoucher;
+    private JLabel               lblVoucherStatus;
+    private JButton              btnCheckout;
 
     public SalesPanel() {
-        setLayout(new BorderLayout(10, 10));
+        setLayout(new BorderLayout(0, 16));
+        setBackground(UITheme.getBgColor());
+        setBorder(new EmptyBorder(20, 24, 20, 24));
 
-        JPanel pnlTop = new JPanel(new GridLayout(3, 3, 5, 5));
-        pnlTop.setBorder(BorderFactory.createTitledBorder("Thông tin bán hàng"));
+        // ===== TITLE =====
+        add(buildTitlePanel(), BorderLayout.NORTH);
 
-        pnlTop.add(new JLabel("Sản phẩm:"));
-        cbProduct = new JComboBox<>();
-        pnlTop.add(cbProduct);
-        pnlTop.add(new JLabel("")); 
+        // ===== CENTER: Form card + Cart card =====
+        JPanel center = new JPanel(new BorderLayout(0, 14));
+        center.setOpaque(false);
 
-        pnlTop.add(new JLabel("Số lượng mua:"));
-        txtQuantity = new JTextField("1");
-        pnlTop.add(txtQuantity);
-        btnAddCart = new JButton("Thêm vào giỏ");
-        btnAddCart.setBackground(new Color(100, 200, 255));
-        pnlTop.add(btnAddCart);
+        // -- Form card --
+        JPanel formCard = UITheme.createCard();
+        formCard.setLayout(new BorderLayout(0, 12));
+        formCard.setBorder(new EmptyBorder(16, 18, 14, 18));
 
-        pnlTop.add(new JLabel("Khách hàng:"));
-        cbCustomer = new JComboBox<>();
-        pnlTop.add(cbCustomer);
+        JLabel formLbl = new JLabel("Thông Tin Bán Hàng");
+        formLbl.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        formLbl.setForeground(UITheme.getTextColor());
+
+        // 3 fields in a row: Product | Qty+Add Button | Customer
+        JPanel fieldRow = new JPanel(new GridLayout(1, 3, 14, 0));
+        fieldRow.setOpaque(false);
+
+        // Product field
+        cbProduct = UITheme.<Product>createComboBox();
+        fieldRow.add(makeField("Sản phẩm:", cbProduct));
+
+        // Qty + button field
+        JPanel qtyPanel = new JPanel(new BorderLayout(8, 0));
+        qtyPanel.setOpaque(false);
+        txtQuantity = UITheme.createTextField();
+        txtQuantity.setText("1");
+        btnAddCart  = UITheme.createButton("+ Thêm vào giỏ", UITheme.BTN_ADD);
+        qtyPanel.add(txtQuantity, BorderLayout.CENTER);
+        qtyPanel.add(btnAddCart, BorderLayout.EAST);
+        fieldRow.add(makeField("Số lượng mua:", qtyPanel));
+
+        // Customer + points
+        JPanel custPanel = new JPanel(new BorderLayout(8, 0));
+        custPanel.setOpaque(false);
+        cbCustomer = UITheme.<Customer>createComboBox();
         lblCustomerPoints = new JLabel("Điểm: 0");
-        lblCustomerPoints.setForeground(Color.BLUE);
-        pnlTop.add(lblCustomerPoints);
-        add(pnlTop, BorderLayout.NORTH);
+        lblCustomerPoints.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        lblCustomerPoints.setForeground(UITheme.PRIMARY);
+        lblCustomerPoints.setBorder(new EmptyBorder(0, 8, 0, 0));
+        custPanel.add(cbCustomer, BorderLayout.CENTER);
+        custPanel.add(lblCustomerPoints, BorderLayout.EAST);
+        fieldRow.add(makeField("Khách hàng:", custPanel));
 
-        cartModel = new DefaultTableModel(new String[]{"ID SP", "Barcode", "Tên Mỹ Phẩm", "Số lượng", "Đơn giá", "Thành tiền"}, 0) {
+        formCard.add(formLbl,  BorderLayout.NORTH);
+        formCard.add(fieldRow, BorderLayout.CENTER);
+
+        // -- Cart card --
+        JPanel cartCard = UITheme.createCard();
+        cartCard.setLayout(new BorderLayout(0, 0));
+        cartCard.setBorder(new EmptyBorder(14, 16, 14, 16));
+
+        JLabel cartLbl = new JLabel("Giỏ Hàng Tạm Thời");
+        cartLbl.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        cartLbl.setForeground(UITheme.getTextColor());
+        cartLbl.setBorder(new EmptyBorder(0, 0, 10, 0));
+
+        cartModel = new DefaultTableModel(
+                new String[]{"ID SP", "Barcode", "Tên Mỹ Phẩm", "Số lượng", "Đơn giá", "Thành tiền"}, 0) {
             @Override public boolean isCellEditable(int row, int column) { return false; }
         };
         tableCart = new JTable(cartModel);
-        tableCart.getColumnModel().getColumn(2).setPreferredWidth(200); 
-        
+        UITheme.styleTable(tableCart);
+        tableCart.getColumnModel().getColumn(2).setPreferredWidth(200);
+
         JScrollPane scrollPane = new JScrollPane(tableCart);
-        scrollPane.setBorder(BorderFactory.createTitledBorder("Giỏ hàng tạm thời"));
-        add(scrollPane, BorderLayout.CENTER);
+        scrollPane.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, UITheme.BORDER_COLOR));
+        scrollPane.getViewport().setBackground(Color.WHITE);
 
-        JPanel pnlBottom = new JPanel(new BorderLayout());
-        pnlBottom.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
+        cartCard.add(cartLbl, BorderLayout.NORTH);
+        cartCard.add(scrollPane, BorderLayout.CENTER);
 
-        JPanel pnlTotalContainer = new JPanel(new GridLayout(2, 1));
+        center.add(formCard, BorderLayout.NORTH);
+        center.add(cartCard, BorderLayout.CENTER);
+        add(center, BorderLayout.CENTER);
 
-        JPanel pnlVoucher = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        pnlVoucher.add(new JLabel("Mã Voucher:"));
-        txtVoucherCode = new JTextField(10);
-        pnlVoucher.add(txtVoucherCode);
-        btnApplyVoucher = new JButton("Áp dụng Mã");
-        pnlVoucher.add(btnApplyVoucher);
+        // ===== SOUTH: Voucher + Total + Checkout =====
+        JPanel bottomCard = UITheme.createCard();
+        bottomCard.setLayout(new BorderLayout(0, 8));
+        bottomCard.setBorder(new EmptyBorder(14, 18, 14, 18));
+
+        // Voucher row
+        JPanel voucherRow = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
+        voucherRow.setOpaque(false);
+        voucherRow.add(new JLabel("Mã Voucher:") {{
+            setFont(UITheme.FONT_LABEL);
+            setForeground(UITheme.getTextSec());
+        }});
+        txtVoucherCode = UITheme.createTextField();
+        txtVoucherCode.setPreferredSize(new Dimension(160, 34));
+        voucherRow.add(txtVoucherCode);
+        btnApplyVoucher = UITheme.createButton("Áp dụng", UITheme.BTN_SEARCH);
+        voucherRow.add(btnApplyVoucher);
         lblVoucherStatus = new JLabel("");
-        lblVoucherStatus.setForeground(new Color(0, 150, 0));
-        pnlVoucher.add(lblVoucherStatus);
+        lblVoucherStatus.setFont(UITheme.FONT_LABEL);
+        lblVoucherStatus.setForeground(UITheme.SUCCESS);
+        voucherRow.add(lblVoucherStatus);
 
-        JPanel pnlTotal = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        // Total + checkout row
+        JPanel totalRow = new JPanel(new FlowLayout(FlowLayout.RIGHT, 12, 0));
+        totalRow.setOpaque(false);
         chkUsePoints = new JCheckBox("Dùng điểm giảm giá");
-        pnlTotal.add(chkUsePoints);
-        pnlTotal.add(new JLabel(" | TỔNG TIỀN PHẢI THANH TOÁN (VND):"));
-        txtTotal = new JTextField("0", 15);
+        chkUsePoints.setFont(UITheme.FONT_BODY);
+        chkUsePoints.setOpaque(false);
+        chkUsePoints.setForeground(UITheme.getTextSec());
+        totalRow.add(chkUsePoints);
+
+        JLabel totalLbl = new JLabel("TỔNG TIỀN THANH TOÁN:");
+        totalLbl.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        totalLbl.setForeground(UITheme.getTextSec());
+        totalRow.add(totalLbl);
+
+        txtTotal = new JTextField("0", 14);
         txtTotal.setEditable(false);
-        txtTotal.setFont(new Font("Arial", Font.BOLD, 16));
-        txtTotal.setForeground(Color.RED);
+        txtTotal.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        txtTotal.setForeground(UITheme.DANGER);
         txtTotal.setHorizontalAlignment(JTextField.RIGHT);
-        pnlTotal.add(txtTotal);
+        txtTotal.setBorder(new EmptyBorder(4, 8, 4, 8));
+        totalRow.add(txtTotal);
 
-        btnCheckout = new JButton("THANH TOÁN & LẬP HÓA ĐƠN");
-        btnCheckout.setFont(new Font("Arial", Font.BOLD, 14));
-        btnCheckout.setBackground(new Color(50, 200, 50));
-        btnCheckout.setForeground(Color.WHITE);
-        btnCheckout.setPreferredSize(new Dimension(300, 40));
+        btnCheckout = UITheme.createButton("✔ THANH TOÁN & LẬP HÓA ĐƠN", UITheme.SUCCESS);
+        btnCheckout.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        btnCheckout.setPreferredSize(new Dimension(310, 42));
+        totalRow.add(btnCheckout);
 
-        pnlTotalContainer.add(pnlVoucher);
-        pnlTotalContainer.add(pnlTotal);
-
-        pnlBottom.add(pnlTotalContainer, BorderLayout.NORTH);
-        pnlBottom.add(btnCheckout, BorderLayout.CENTER);
-
-        add(pnlBottom, BorderLayout.SOUTH);
+        bottomCard.add(voucherRow, BorderLayout.NORTH);
+        bottomCard.add(totalRow, BorderLayout.SOUTH);
+        add(bottomCard, BorderLayout.SOUTH);
     }
 
-    public JComboBox<Product> getCbProduct() { return cbProduct; }
-    public JTextField getTxtQuantity() { return txtQuantity; }
-    public JButton getBtnAddCart() { return btnAddCart; }
-    public JComboBox<Customer> getCbCustomer() { return cbCustomer; } 
-    public JLabel getLblCustomerPoints() { return lblCustomerPoints; }
-    public JTable getTableCart() { return tableCart; }
-    public DefaultTableModel getCartModel() { return cartModel; }
-    public JTextField getTxtTotal() { return txtTotal; }
-    public JCheckBox getChkUsePoints() { return chkUsePoints; }
-    public JTextField getTxtVoucherCode() { return txtVoucherCode; }
-    public JButton getBtnApplyVoucher() { return btnApplyVoucher; }
-    public JLabel getLblVoucherStatus() { return lblVoucherStatus; }
-    public JButton getBtnCheckout() { return btnCheckout; }
+    private JPanel buildTitlePanel() {
+        JLabel t = UITheme.createSectionTitle("Bán Hàng");
+        JLabel s = UITheme.createSubTitle("LẬP HÓA ĐƠN BÁN HÀNG");
+        JPanel p = new JPanel();
+        p.setLayout(new BoxLayout(p, BoxLayout.Y_AXIS));
+        p.setOpaque(false);
+        p.add(t); p.add(Box.createVerticalStrut(2)); p.add(s);
+        JPanel wrap = new JPanel(new BorderLayout());
+        wrap.setOpaque(false);
+        wrap.add(p, BorderLayout.WEST);
+        return wrap;
+    }
+
+    private JPanel makeField(String label, JComponent input) {
+        JPanel p = new JPanel(new BorderLayout(0, 4));
+        p.setOpaque(false);
+        JLabel lbl = new JLabel(label);
+        lbl.setFont(UITheme.FONT_LABEL);
+        lbl.setForeground(UITheme.getTextSec());
+        p.add(lbl, BorderLayout.NORTH);
+        p.add(input, BorderLayout.CENTER);
+        return p;
+    }
+
+    // ========== GETTERS ==========
+    public JComboBox<Product>  getCbProduct()       { return cbProduct; }
+    public JTextField          getTxtQuantity()     { return txtQuantity; }
+    public JButton             getBtnAddCart()      { return btnAddCart; }
+    public JComboBox<Customer> getCbCustomer()      { return cbCustomer; }
+    public JLabel              getLblCustomerPoints(){ return lblCustomerPoints; }
+    public JTable              getTableCart()       { return tableCart; }
+    public DefaultTableModel   getCartModel()       { return cartModel; }
+    public JTextField          getTxtTotal()        { return txtTotal; }
+    public JCheckBox           getChkUsePoints()    { return chkUsePoints; }
+    public JTextField          getTxtVoucherCode()  { return txtVoucherCode; }
+    public JButton             getBtnApplyVoucher() { return btnApplyVoucher; }
+    public JLabel              getLblVoucherStatus(){ return lblVoucherStatus; }
+    public JButton             getBtnCheckout()     { return btnCheckout; }
 }

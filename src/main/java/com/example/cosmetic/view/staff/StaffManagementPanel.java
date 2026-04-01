@@ -1,107 +1,142 @@
 package com.example.cosmetic.view.staff;
 
+import com.example.cosmetic.view.utils.UITheme;
+
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 
 public class StaffManagementPanel extends JPanel {
-    private JTextField txtStaffCode, txtFullName, txtUsername;
+    private JTextField     txtStaffCode, txtFullName, txtUsername;
     private JPasswordField txtPassword;
     private JComboBox<String> cbRole;
-    private JTable tblStaff;
+    private JTable         tblStaff;
     private DefaultTableModel tableModel;
-    private JButton btnAdd, btnUpdate, btnDelete, btnClear;
+    private JButton        btnAdd, btnUpdate, btnDelete, btnClear;
 
     public StaffManagementPanel() {
         initComponents();
     }
 
     private void initComponents() {
-        setLayout(new BorderLayout(10, 10));
-        setBackground(Color.WHITE);
+        setLayout(new BorderLayout(0, 16));
+        setBackground(UITheme.getBgColor());
+        setBorder(new EmptyBorder(20, 24, 20, 24));
 
-        // 1. FORM NHẬP LIỆU
-        JPanel formPanel = new JPanel(new GridLayout(5, 2, 10, 10));
-        formPanel.setBorder(BorderFactory.createTitledBorder("Thông tin Nhân viên"));
-        formPanel.setBackground(Color.WHITE);
+        // Title
+        add(buildTitlePanel("Quản Lý Nhân Viên", "DANH SÁCH NHÂN VIÊN"), BorderLayout.NORTH);
 
-        formPanel.add(new JLabel("Mã Nhân viên:"));
-        txtStaffCode = new JTextField();
-        formPanel.add(txtStaffCode);
+        // Form card
+        JPanel formCard = UITheme.createCard();
+        formCard.setLayout(new BorderLayout(0, 12));
+        formCard.setBorder(new EmptyBorder(16, 18, 14, 18));
 
-        formPanel.add(new JLabel("Họ và Tên:"));
-        txtFullName = new JTextField();
-        formPanel.add(txtFullName);
+        JLabel formLbl = new JLabel("Thông tin Nhân viên");
+        formLbl.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        formLbl.setForeground(UITheme.getTextColor());
 
-        formPanel.add(new JLabel("Tài khoản (Username):"));
-        txtUsername = new JTextField();
-        formPanel.add(txtUsername);
+        JPanel formGrid = new JPanel(new GridLayout(1, 5, 14, 0));
+        formGrid.setOpaque(false);
 
-        formPanel.add(new JLabel("Mật khẩu:"));
-        txtPassword = new JPasswordField();
-        formPanel.add(txtPassword);
+        txtStaffCode = UITheme.createTextField();
+        txtFullName  = UITheme.createTextField();
+        txtUsername  = UITheme.createTextField();
+        txtPassword  = UITheme.createPasswordField();
+        cbRole       = UITheme.<String>createComboBox();
+        cbRole.addItem("STAFF");
+        cbRole.addItem("ADMIN");
 
-        formPanel.add(new JLabel("Vai trò (Phân quyền):"));
-        String[] roles = {"STAFF", "ADMIN"};
-        cbRole = new JComboBox<>(roles);
-        formPanel.add(cbRole);
+        formGrid.add(makeField("Mã Nhân viên:",       txtStaffCode));
+        formGrid.add(makeField("Họ và Tên:",           txtFullName));
+        formGrid.add(makeField("Tài khoản (Username):",txtUsername));
+        formGrid.add(makeField("Mật khẩu:",            txtPassword));
+        formGrid.add(makeField("Vai trò (Phân quyền):",cbRole));
 
-        // Nút chức năng
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 10));
-        buttonPanel.setBackground(Color.WHITE);
-        
-        btnAdd = new JButton("Thêm mới");
-        btnUpdate = new JButton("Cập nhật");
-        btnDelete = new JButton("Xóa");
-        btnClear = new JButton("Làm mới Form");
+        JPanel btnRow = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
+        btnRow.setOpaque(false);
+        btnAdd    = UITheme.createButton("+ Thêm mới",  UITheme.BTN_ADD);
+        btnUpdate = UITheme.createButton("✎ Cập nhật",  UITheme.BTN_EDIT);
+        btnDelete = UITheme.createButton("✕ Xóa",       UITheme.BTN_DELETE);
+        btnClear  = UITheme.createButton("↺ Làm mới",   UITheme.BTN_CLEAR);
+        btnRow.add(btnAdd); btnRow.add(btnUpdate); btnRow.add(btnDelete); btnRow.add(btnClear);
 
-        buttonPanel.add(btnAdd);
-        buttonPanel.add(btnUpdate);
-        buttonPanel.add(btnDelete);
-        buttonPanel.add(btnClear);
+        formCard.add(formLbl,  BorderLayout.NORTH);
+        formCard.add(formGrid, BorderLayout.CENTER);
+        formCard.add(btnRow,   BorderLayout.SOUTH);
 
-        JPanel topPanel = new JPanel(new BorderLayout());
-        topPanel.add(formPanel, BorderLayout.CENTER);
-        topPanel.add(buttonPanel, BorderLayout.SOUTH);
+        // Table card
+        JPanel tableCard = UITheme.createCard();
+        tableCard.setLayout(new BorderLayout(0, 10));
+        tableCard.setBorder(new EmptyBorder(14, 16, 14, 16));
 
-        // 2. BẢNG DỮ LIỆU
-        String[] columnNames = {"ID", "Mã NV", "Họ Tên", "Tài khoản", "Vai trò"};
-        tableModel = new DefaultTableModel(columnNames, 0) {
-            @Override
-            public boolean isCellEditable(int row, int column) { return false; } // Khóa không cho sửa trực tiếp trên bảng
+        String[] cols = {"ID", "Mã NV", "Họ Tên", "Tài khoản", "Vai trò"};
+        tableModel = new DefaultTableModel(cols, 0) {
+            @Override public boolean isCellEditable(int r, int c) { return false; }
         };
         tblStaff = new JTable(tableModel);
-        JScrollPane scrollPane = new JScrollPane(tblStaff);
-        scrollPane.setBorder(BorderFactory.createTitledBorder("Danh sách Nhân viên"));
+        UITheme.styleTable(tblStaff);
+        // Badge role renderer
+        tblStaff.getColumnModel().getColumn(4).setCellRenderer(new UITheme.GenericBadgeRenderer("ADMIN"));
 
-        // Click dòng nào hiện lên form dòng đó
+        // Click dòng → điền form
         tblStaff.getSelectionModel().addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting() && tblStaff.getSelectedRow() != -1) {
                 int row = tblStaff.getSelectedRow();
                 txtStaffCode.setText(tblStaff.getValueAt(row, 1).toString());
-                txtFullName.setText(tblStaff.getValueAt(row, 2).toString());
-                txtUsername.setText(tblStaff.getValueAt(row, 3).toString());
+                txtFullName.setText (tblStaff.getValueAt(row, 2).toString());
+                txtUsername.setText  (tblStaff.getValueAt(row, 3).toString());
                 cbRole.setSelectedItem(tblStaff.getValueAt(row, 4).toString());
-                txtPassword.setText("123456"); 
+                txtPassword.setText("123456");
             }
         });
 
-        add(topPanel, BorderLayout.NORTH);
-        add(scrollPane, BorderLayout.CENTER);
+        JScrollPane scroll = new JScrollPane(tblStaff);
+        scroll.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, UITheme.BORDER_COLOR));
+        scroll.getViewport().setBackground(Color.WHITE);
+        tableCard.add(scroll, BorderLayout.CENTER);
+
+        JPanel center = new JPanel(new BorderLayout(0, 14));
+        center.setOpaque(false);
+        center.add(formCard,  BorderLayout.NORTH);
+        center.add(tableCard, BorderLayout.CENTER);
+        add(center, BorderLayout.CENTER);
     }
 
-    // =========================================
-    // GETTERS CHO CONTROLLER SỬ DỤNG
-    // =========================================
-    public DefaultTableModel getTableModel() { return tableModel; }
-    public JTable getTblStaff() { return tblStaff; }
-    public JTextField getTxtStaffCode() { return txtStaffCode; }
-    public JTextField getTxtFullName() { return txtFullName; }
-    public JTextField getTxtUsername() { return txtUsername; }
-    public JPasswordField getTxtPassword() { return txtPassword; }
-    public JComboBox<String> getCbRole() { return cbRole; }
-    public JButton getBtnAdd() { return btnAdd; }
-    public JButton getBtnUpdate() { return btnUpdate; }
-    public JButton getBtnDelete() { return btnDelete; }
-    public JButton getBtnClear() { return btnClear; }
+    private JPanel buildTitlePanel(String title, String subtitle) {
+        JLabel t = UITheme.createSectionTitle(title);
+        JLabel s = UITheme.createSubTitle(subtitle);
+        JPanel p = new JPanel();
+        p.setLayout(new BoxLayout(p, BoxLayout.Y_AXIS));
+        p.setOpaque(false);
+        p.add(t); p.add(Box.createVerticalStrut(2)); p.add(s);
+        JPanel wrap = new JPanel(new BorderLayout());
+        wrap.setOpaque(false);
+        wrap.add(p, BorderLayout.WEST);
+        return wrap;
+    }
+
+    private JPanel makeField(String label, JComponent input) {
+        JPanel p = new JPanel(new BorderLayout(0, 4));
+        p.setOpaque(false);
+        JLabel lbl = new JLabel(label);
+        lbl.setFont(UITheme.FONT_LABEL);
+        lbl.setForeground(UITheme.getTextSec());
+        p.add(lbl, BorderLayout.NORTH);
+        p.add(input, BorderLayout.CENTER);
+        return p;
+    }
+
+    // Getters
+    public DefaultTableModel  getTableModel()   { return tableModel; }
+    public JTable             getTblStaff()     { return tblStaff; }
+    public JTextField         getTxtStaffCode() { return txtStaffCode; }
+    public JTextField         getTxtFullName()  { return txtFullName; }
+    public JTextField         getTxtUsername()  { return txtUsername; }
+    public JPasswordField     getTxtPassword()  { return txtPassword; }
+    public JComboBox<String>  getCbRole()       { return cbRole; }
+    public JButton            getBtnAdd()       { return btnAdd; }
+    public JButton            getBtnUpdate()    { return btnUpdate; }
+    public JButton            getBtnDelete()    { return btnDelete; }
+    public JButton            getBtnClear()     { return btnClear; }
 }

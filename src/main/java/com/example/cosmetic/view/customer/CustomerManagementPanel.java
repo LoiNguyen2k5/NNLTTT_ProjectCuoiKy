@@ -1,7 +1,10 @@
 package com.example.cosmetic.view.customer;
 
 import com.example.cosmetic.model.enums.CustomerGender;
+import com.example.cosmetic.view.utils.UITheme;
+
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 
@@ -13,75 +16,115 @@ public class CustomerManagementPanel extends JPanel {
     private DefaultTableModel tableModel;
 
     public CustomerManagementPanel() {
-        setLayout(new BorderLayout(10, 10));
+        setLayout(new BorderLayout(0, 16));
+        setBackground(UITheme.getBgColor());
+        setBorder(new EmptyBorder(20, 24, 20, 24));
 
-        // Form Nhập liệu
-        JPanel panelForm = new JPanel(new GridLayout(4, 2, 5, 5));
-        panelForm.setBorder(BorderFactory.createTitledBorder("Thông tin Khách hàng"));
+        add(buildTitlePanel("Khách Hàng", "DANH SÁCH KHÁCH HÀNG"), BorderLayout.NORTH);
 
-        panelForm.add(new JLabel("Họ và Tên:")); txtFullName = new JTextField(); panelForm.add(txtFullName);
-        panelForm.add(new JLabel("Số điện thoại:")); txtPhone = new JTextField(); panelForm.add(txtPhone);
-        panelForm.add(new JLabel("Điểm tích lũy (Cập nhật tự động):")); 
-        txtPoints = new JTextField(); 
-        txtPoints.setEditable(false); // Khác hàng tự đi mua để tăng điểm, hoặc thanh toán thì trừ, không cho nhập tay
-        panelForm.add(txtPoints);
-        
-        panelForm.add(new JLabel("Giới tính:")); 
-        cbGender = new JComboBox<>(CustomerGender.values()); 
-        panelForm.add(cbGender);
+        // Form card
+        JPanel formCard = UITheme.createCard();
+        formCard.setLayout(new BorderLayout(0, 12));
+        formCard.setBorder(new EmptyBorder(16, 18, 14, 18));
 
-        // Nút chức năng
-        JPanel panelButtons = new JPanel(new FlowLayout());
-        btnAdd = createStyledButton("Thêm", new Color(40, 167, 69));
-        btnUpdate = createStyledButton("Sửa", new Color(0, 123, 255));
-        btnDelete = createStyledButton("Xóa", new Color(220, 53, 69));
-        btnClear = createStyledButton("Làm mới", new Color(108, 117, 125));
-        panelButtons.add(btnAdd); panelButtons.add(btnUpdate); 
-        panelButtons.add(btnDelete); panelButtons.add(btnClear);
+        JLabel formLbl = new JLabel("Thông tin Khách Hàng");
+        formLbl.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        formLbl.setForeground(UITheme.getTextColor());
 
-        // Vùng Tìm kiếm
-        JPanel panelSearch = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        panelSearch.add(new JLabel("Tìm theo SĐT:"));
-        txtSearch = new JTextField(15);
-        btnSearch = createStyledButton("Tìm kiếm", new Color(23, 162, 184));
-        panelSearch.add(txtSearch);
-        panelSearch.add(btnSearch);
+        JPanel formGrid = new JPanel(new GridLayout(1, 4, 14, 0));
+        formGrid.setOpaque(false);
 
-        // Gom Form và Nút bấm lên trên cùng
-        JPanel topPanel = new JPanel(new BorderLayout());
-        topPanel.add(panelForm, BorderLayout.NORTH);
-        topPanel.add(panelButtons, BorderLayout.CENTER);
-        topPanel.add(panelSearch, BorderLayout.SOUTH);
-        add(topPanel, BorderLayout.NORTH);
+        txtFullName = UITheme.createTextField();
+        txtPhone    = UITheme.createTextField();
+        txtPoints   = UITheme.createTextField();
+        txtPoints.setEditable(false);
+        txtPoints.setBackground(new Color(243, 244, 246));
+        cbGender    = UITheme.<CustomerGender>createComboBox();
+        for (CustomerGender g : CustomerGender.values()) cbGender.addItem(g);
 
-        // Bảng dữ liệu
-        tableModel = new DefaultTableModel(new String[]{"ID", "Họ và Tên", "Số điện thoại", "Điểm tích lũy", "Giới tính"}, 0);
+        formGrid.add(makeField("Họ và Tên:",                      txtFullName));
+        formGrid.add(makeField("Số điện thoại:",                  txtPhone));
+        formGrid.add(makeField("Điểm tích lũy (Tự động):",        txtPoints));
+        formGrid.add(makeField("Giới tính:",                      cbGender));
+
+        JPanel btnRow = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
+        btnRow.setOpaque(false);
+        btnAdd    = UITheme.createButton("+ Thêm mới",  UITheme.BTN_ADD);
+        btnUpdate = UITheme.createButton("✎ Cập nhật",  UITheme.BTN_EDIT);
+        btnDelete = UITheme.createButton("✕ Xóa",       UITheme.BTN_DELETE);
+        btnClear  = UITheme.createButton("↺ Làm mới",   UITheme.BTN_CLEAR);
+        btnRow.add(btnAdd); btnRow.add(btnUpdate); btnRow.add(btnDelete); btnRow.add(btnClear);
+
+        formCard.add(formLbl,  BorderLayout.NORTH);
+        formCard.add(formGrid, BorderLayout.CENTER);
+        formCard.add(btnRow,   BorderLayout.SOUTH);
+
+        // Table card
+        JPanel tableCard = UITheme.createCard();
+        tableCard.setLayout(new BorderLayout(0, 10));
+        tableCard.setBorder(new EmptyBorder(14, 16, 14, 16));
+
+        JPanel toolbar = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
+        toolbar.setOpaque(false);
+        txtSearch = UITheme.createSearchField("Tìm theo số điện thoại...");
+        txtSearch.setPreferredSize(new Dimension(260, 36));
+        btnSearch = UITheme.createButton("🔍 Tìm kiếm", UITheme.BTN_SEARCH);
+        toolbar.add(txtSearch); toolbar.add(btnSearch);
+        tableCard.add(toolbar, BorderLayout.NORTH);
+
+        tableModel = new DefaultTableModel(new String[]{"ID", "Họ và Tên", "Số điện thoại", "Điểm tích lũy", "Giới tính"}, 0) {
+            @Override public boolean isCellEditable(int r, int c) { return false; }
+        };
         table = new JTable(tableModel);
-        add(new JScrollPane(table), BorderLayout.CENTER);
+        UITheme.styleTable(table);
+
+        JScrollPane scroll = new JScrollPane(table);
+        scroll.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, UITheme.BORDER_COLOR));
+        scroll.getViewport().setBackground(Color.WHITE);
+        tableCard.add(scroll, BorderLayout.CENTER);
+
+        JPanel center = new JPanel(new BorderLayout(0, 14));
+        center.setOpaque(false);
+        center.add(formCard,  BorderLayout.NORTH);
+        center.add(tableCard, BorderLayout.CENTER);
+        add(center, BorderLayout.CENTER);
     }
 
-    private JButton createStyledButton(String text, Color bgColor) {
-        JButton button = new JButton(text);
-        button.setFont(new Font("Arial", Font.BOLD, 13));
-        button.setForeground(Color.WHITE);
-        button.setBackground(bgColor);
-        button.setFocusPainted(false);
-        button.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
-        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        return button;
+    private JPanel buildTitlePanel(String title, String subtitle) {
+        JLabel t = UITheme.createSectionTitle(title);
+        JLabel s = UITheme.createSubTitle(subtitle);
+        JPanel p = new JPanel();
+        p.setLayout(new BoxLayout(p, BoxLayout.Y_AXIS));
+        p.setOpaque(false);
+        p.add(t); p.add(Box.createVerticalStrut(2)); p.add(s);
+        JPanel wrap = new JPanel(new BorderLayout());
+        wrap.setOpaque(false);
+        wrap.add(p, BorderLayout.WEST);
+        return wrap;
+    }
+
+    private JPanel makeField(String label, JComponent input) {
+        JPanel p = new JPanel(new BorderLayout(0, 4));
+        p.setOpaque(false);
+        JLabel lbl = new JLabel(label);
+        lbl.setFont(UITheme.FONT_LABEL);
+        lbl.setForeground(UITheme.getTextSec());
+        p.add(lbl, BorderLayout.NORTH);
+        p.add(input, BorderLayout.CENTER);
+        return p;
     }
 
     // Getters
-    public JTextField getTxtFullName() { return txtFullName; }
-    public JTextField getTxtPhone() { return txtPhone; }
-    public JTextField getTxtPoints() { return txtPoints; }
-    public JTextField getTxtSearch() { return txtSearch; }
+    public JTextField getTxtFullName()           { return txtFullName; }
+    public JTextField getTxtPhone()              { return txtPhone; }
+    public JTextField getTxtPoints()             { return txtPoints; }
+    public JTextField getTxtSearch()             { return txtSearch; }
     public JComboBox<CustomerGender> getCbGender() { return cbGender; }
-    public JButton getBtnAdd() { return btnAdd; }
-    public JButton getBtnUpdate() { return btnUpdate; }
-    public JButton getBtnDelete() { return btnDelete; }
-    public JButton getBtnClear() { return btnClear; }
-    public JButton getBtnSearch() { return btnSearch; }
-    public JTable getTable() { return table; }
-    public DefaultTableModel getTableModel() { return tableModel; }
+    public JButton getBtnAdd()                   { return btnAdd; }
+    public JButton getBtnUpdate()                { return btnUpdate; }
+    public JButton getBtnDelete()                { return btnDelete; }
+    public JButton getBtnClear()                 { return btnClear; }
+    public JButton getBtnSearch()                { return btnSearch; }
+    public JTable getTable()                     { return table; }
+    public DefaultTableModel getTableModel()     { return tableModel; }
 }

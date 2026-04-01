@@ -7,6 +7,8 @@ import com.example.cosmetic.model.entity.Staff;
 import com.example.cosmetic.service.CustomerService;
 import com.example.cosmetic.view.customer.CustomerManagementPanel;
 import javax.swing.*;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.util.List;
 
 public class CustomerController {
@@ -103,15 +105,31 @@ public class CustomerController {
         // Làm mới
         view.getBtnClear().addActionListener(e -> clearForm());
 
-        // Tìm kiếm
-        view.getBtnSearch().addActionListener(e -> {
-            String keyword = view.getTxtSearch().getText().trim();
-            if (keyword.isEmpty()) {
-                loadTable(customerService.getAllCustomers());
-            } else {
-                loadTable(customerService.searchCustomerByPhone(keyword));
+        // Tìm kiếm — Button click
+        view.getBtnSearch().addActionListener(e -> doSearch());
+
+        // Tìm kiếm — Enter từ bàn phím
+        view.getTxtSearch().addKeyListener(new KeyAdapter() {
+            @Override public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) doSearch();
             }
         });
+    }
+
+    /** Thực hiện tìm kiếm theo nội dung ô tìm kiếm */
+    private void doSearch() {
+        String keyword = view.getTxtSearch().getText().trim();
+        if (keyword.isEmpty()) {
+            loadTable(customerService.getAllCustomers());
+        } else {
+            List<Customer> result = customerService.searchCustomerByPhone(keyword);
+            loadTable(result);
+            if (result == null || result.isEmpty()) {
+                JOptionPane.showMessageDialog(view,
+                    "Không tìm thấy khách hàng với số điện thoại: " + keyword,
+                    "Thông báo", JOptionPane.INFORMATION_MESSAGE);
+            }
+        }
     }
 
     private Customer getCustomerFromForm() {
@@ -129,5 +147,6 @@ public class CustomerController {
         view.getCbGender().setSelectedIndex(0);
         view.getTxtSearch().setText("");
         view.getTable().clearSelection();
+        loadTable(customerService.getAllCustomers()); // reset bảng về toàn bộ
     }
 }
