@@ -1,6 +1,7 @@
 package com.example.cosmetic.view.statistics;
 
-import com.example.cosmetic.view.utils.UITheme;
+import com.example.cosmetic.model.enums.StaffRole;
+import com.example.cosmetic.view.components.UITheme;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -14,7 +15,8 @@ public class StatisticsPanel extends JPanel {
     private JButton             btnRefresh, btnExportPDF;
     private JPanel              pnlChart;
 
-    public StatisticsPanel() {
+    public StatisticsPanel(StaffRole role) {
+        boolean isStaff = (role == StaffRole.STAFF);
         setLayout(new BorderLayout(0, 14));
         setBackground(UITheme.getBgColor());
         setBorder(new EmptyBorder(20, 24, 16, 24));
@@ -26,8 +28,9 @@ public class StatisticsPanel extends JPanel {
         JPanel centerWrapper = new JPanel(new BorderLayout(0, 12));
         centerWrapper.setOpaque(false);
 
-        // -- KPI Row: 5 stat cards --
-        JPanel kpiRow = new JPanel(new GridLayout(1, 5, 10, 0));
+        // -- KPI Row: 5 stat cards (STAFF thay bang 4 the) --
+        int kpiCols = isStaff ? 4 : 5;
+        JPanel kpiRow = new JPanel(new GridLayout(1, kpiCols, 10, 0));
         kpiRow.setOpaque(false);
         kpiRow.setPreferredSize(new Dimension(0, 108));
 
@@ -35,7 +38,12 @@ public class StatisticsPanel extends JPanel {
         lblOutOfStock     = addKpiCard(kpiRow, "Het Hang",       "SP",  UITheme.DANGER,  UITheme.DANGER_BG);
         lblExpiringSoon   = addKpiCard(kpiRow, "Sap Het Han",    "SP",  UITheme.WARNING, UITheme.WARNING_BG);
         lblTodayRevenue   = addKpiCard(kpiRow, "DT Hom Nay",     "VND", UITheme.SUCCESS, UITheme.SUCCESS_BG);
-        lblTotalRevenue   = addKpiCard(kpiRow, "Tong Doanh Thu", "VND", UITheme.PRIMARY, UITheme.PRIMARY_LIGHT);
+        // Chi admin/manager moi xem duoc Tong Doanh Thu
+        if (!isStaff) {
+            lblTotalRevenue = addKpiCard(kpiRow, "Tong Doanh Thu", "VND", UITheme.PRIMARY, UITheme.PRIMARY_LIGHT);
+        } else {
+            lblTotalRevenue = new JLabel("0"); // placeholder, khong hien thi
+        }
 
         // -- Table row: Top Selling + Expiring + Chart --
         JPanel tableRow = new JPanel(new GridLayout(1, 3, 10, 0));
@@ -53,6 +61,7 @@ public class StatisticsPanel extends JPanel {
         tableTopSelling = new JTable(tableModel);
         UITheme.styleTable(tableTopSelling);
         JScrollPane scroll1 = new JScrollPane(tableTopSelling);
+        scroll1.getViewport().setBackground(UITheme.getCardColor());
         scroll1.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, UITheme.BORDER_COLOR));
         topSellingCard.add(lbl1, BorderLayout.NORTH);
         topSellingCard.add(scroll1, BorderLayout.CENTER);
@@ -69,6 +78,7 @@ public class StatisticsPanel extends JPanel {
         tableExpiring = new JTable(expiringModel);
         UITheme.styleTable(tableExpiring);
         JScrollPane scroll2 = new JScrollPane(tableExpiring);
+        scroll2.getViewport().setBackground(UITheme.getCardColor());
         scroll2.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, UITheme.BORDER_COLOR));
         expiringCard.add(lbl2, BorderLayout.NORTH);
         expiringCard.add(scroll2, BorderLayout.CENTER);
@@ -102,7 +112,10 @@ public class StatisticsPanel extends JPanel {
         btnRefresh = UITheme.createButton("Lam Moi Thong Ke", UITheme.BTN_CLEAR);
         btnRefresh.setPreferredSize(new Dimension(190, 38));
 
-        bottomBar.add(btnExportPDF);
+        // Staff khong duoc xuat PDF
+        if (!isStaff) {
+            bottomBar.add(btnExportPDF);
+        }
         bottomBar.add(btnRefresh);
         add(bottomBar, BorderLayout.SOUTH);
     }
@@ -114,8 +127,8 @@ public class StatisticsPanel extends JPanel {
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                // White background rounded
-                g2.setColor(Color.WHITE);
+                // Background rounded
+                g2.setColor(UITheme.getCardColor());
                 g2.fillRoundRect(0, 0, getWidth(), getHeight(), 16, 16);
                 // Accent bar at top (4px high, full width)
                 g2.setColor(accentColor);

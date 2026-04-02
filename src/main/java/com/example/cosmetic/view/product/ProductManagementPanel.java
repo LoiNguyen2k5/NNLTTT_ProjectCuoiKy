@@ -2,7 +2,7 @@ package com.example.cosmetic.view.product;
 
 import com.example.cosmetic.model.entity.Brand;
 import com.example.cosmetic.model.entity.Category;
-import com.example.cosmetic.view.utils.UITheme;
+import com.example.cosmetic.view.components.UITheme;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -70,7 +70,9 @@ public class ProductManagementPanel extends JPanel {
         formGrid.add(makeField("Hạn SD (dd/MM/yyyy):", txtExpirationDate));
         formGrid.add(makeField("Loại mỹ phẩm:", cbCategory));
         formGrid.add(makeField("Thương hiệu:", cbBrand));
-        formGrid.add(new JPanel()); // placeholder
+        JPanel placeholder = new JPanel();
+        placeholder.setOpaque(false);
+        formGrid.add(placeholder);
 
         formCard.add(formTitle, BorderLayout.NORTH);
         formCard.add(formGrid,  BorderLayout.CENTER);
@@ -135,7 +137,7 @@ public class ProductManagementPanel extends JPanel {
 
         JScrollPane scrollPane = new JScrollPane(table);
         scrollPane.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, UITheme.BORDER_COLOR));
-        scrollPane.getViewport().setBackground(Color.WHITE);
+        scrollPane.getViewport().setBackground(UITheme.getCardColor());
 
         tableCard.add(scrollPane, BorderLayout.CENTER);
         add(tableCard, BorderLayout.CENTER);

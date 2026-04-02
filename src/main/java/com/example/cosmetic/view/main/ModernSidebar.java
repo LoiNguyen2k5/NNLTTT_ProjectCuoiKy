@@ -1,6 +1,6 @@
 package com.example.cosmetic.view.main;
 
-import com.example.cosmetic.view.utils.UITheme;
+import com.example.cosmetic.view.components.UITheme;
 import com.example.cosmetic.model.enums.StaffRole;
 
 import javax.swing.*;

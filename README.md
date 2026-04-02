@@ -36,16 +36,22 @@ Dự án được xây dựng với 2 vai trò chính (Admin, Staff), mỗi vai 
   * Xem, tìm kiếm và lọc danh sách sản phẩm mỹ phẩm hiện có.
 * **Chăm sóc Khách hàng:**
   * Quản lý thông tin khách hàng, lưu trữ lịch sử mua hàng.
+* **Thống kê (Giới hạn):**
+  * Xem doanh thu hôm nay, top 10 sản phẩm bán chạy nhất và biểu đồ trực quan.
+  * Nhận cảnh báo hàng sắp hết hạn và hàng hết hàng.
+  * ⚠️ *Không* xem được Tổng Doanh Thu toàn thời gian và *không* xuất báo cáo PDF.
 
 ### Quản trị viên (Admin)
 Kế thừa toàn bộ quyền hạn của Staff, đồng thời bổ sung các quyền quản lý cấp cao:
 * **Quản lý Nhân sự:** Thêm, sửa, xóa tài khoản và phân quyền cho nhân viên.
 * **Kiểm soát Hệ thống:**
   * Quản lý chuyên sâu danh mục Sản phẩm, Thương hiệu, Nhà cung cấp.
-* **Dashboard Trực quan & Thống kê:**
+* **Dashboard Trực quan & Thống kê Toàn quyền:**
   * Bảng điều khiển (Dashboard) hiển thị chi tiết và trực quan biểu đồ doanh thu, tổng số đơn hàng, và lượng khách hàng.
   * Thống kê top nhân viên xuất sắc và top sản phẩm bán chạy nhất trong tháng.
   * Theo dõi cảnh báo tồn kho và cảnh báo sản phẩm sắp hết hạn ngay trên giao diện chính.
+  * Xem **Tổng Doanh Thu** toàn bộ lịch sử kinh doanh (thông tin ẩn với Staff).
+  * **Xuất Báo Cáo PDF** đầy đủ tổng hợp doanh thu và sản phẩm bán chạy.
 
 ### 🌟 Tính năng Nâng cao
 Hệ thống được tích hợp thêm các tính năng nâng cao nhằm tối ưu hóa trải nghiệm người dùng:
@@ -111,3 +117,24 @@ Bạn có thể sử dụng các tài khoản sau để test hệ thống ngay l
 | **Admin** | `admin` | `123456` |
 | **Staff** | `staff1` | `123456` |
 | **Staff** | `staff2` | `123456` |
+
+---
+
+## 🔐 Phân quyền Chi tiết theo Chức năng
+
+Hệ thống áp dụng kiểm soát quyền truy cập (Role-Based Access Control) ở cả tầng **View** (ẩn/hiện UI) và tầng **Controller** (bảo vệ logic nghiệp vụ).
+
+| Chức năng | Staff | Admin |
+| :--- | :---: | :---: |
+| Lập hóa đơn / Bán hàng | ✅ | ✅ |
+| Xem lịch sử hóa đơn | ✅ | ✅ |
+| Nhập kho | ✅ | ✅ |
+| Quản lý khách hàng | ✅ | ✅ |
+| Xem sản phẩm / danh mục | ✅ | ✅ |
+| Thống kê: DT hôm nay, Top bán chạy, Cảnh báo HSD | ✅ | ✅ |
+| Thống kê: **Tổng Doanh Thu** toàn thời gian | ❌ | ✅ |
+| Thống kê: **Xuất Báo Cáo PDF** | ❌ | ✅ |
+| Quản lý nhân viên (thêm / sửa / xóa) | ❌ | ✅ |
+| Quản lý Thương hiệu / Nhà cung cấp | ❌ | ✅ |
+| Quản lý Mã khuyến mãi | ❌ | ✅ |
+| Backup Database | ❌ | ✅ |

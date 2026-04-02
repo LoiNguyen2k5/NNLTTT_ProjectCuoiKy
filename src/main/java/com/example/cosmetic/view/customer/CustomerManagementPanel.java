@@ -1,7 +1,7 @@
 package com.example.cosmetic.view.customer;
 
 import com.example.cosmetic.model.enums.CustomerGender;
-import com.example.cosmetic.view.utils.UITheme;
+import com.example.cosmetic.view.components.UITheme;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -38,7 +38,7 @@ public class CustomerManagementPanel extends JPanel {
         txtPhone    = UITheme.createTextField();
         txtPoints   = UITheme.createTextField();
         txtPoints.setEditable(false);
-        txtPoints.setBackground(new Color(243, 244, 246));
+        txtPoints.setBackground(UITheme.isDark ? UITheme.DARK_FIELD_BG : new Color(243, 244, 246));
         cbGender    = UITheme.<CustomerGender>createComboBox();
         for (CustomerGender g : CustomerGender.values()) cbGender.addItem(g);
 
@@ -80,7 +80,7 @@ public class CustomerManagementPanel extends JPanel {
 
         JScrollPane scroll = new JScrollPane(table);
         scroll.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, UITheme.BORDER_COLOR));
-        scroll.getViewport().setBackground(Color.WHITE);
+        scroll.getViewport().setBackground(UITheme.getCardColor());
         tableCard.add(scroll, BorderLayout.CENTER);
 
         JPanel center = new JPanel(new BorderLayout(0, 14));

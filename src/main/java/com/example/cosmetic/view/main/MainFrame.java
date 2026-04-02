@@ -20,7 +20,7 @@ import com.example.cosmetic.view.dashboard.DashboardPanel;
 import com.example.cosmetic.view.staff.StaffManagementPanel;
 import com.example.cosmetic.controller.*;
 import com.example.cosmetic.view.utils.DatabaseBackupUtil;
-import com.example.cosmetic.view.utils.UITheme;
+import com.example.cosmetic.view.components.UITheme;
 
 import javax.swing.*;
 import java.awt.*;
@@ -238,8 +238,8 @@ public class MainFrame extends JFrame {
     private void openStatistics() {
         StatisticsRepositoryImpl repo = new StatisticsRepositoryImpl();
         StatisticsServiceImpl service = new StatisticsServiceImpl(repo);
-        StatisticsPanel view = new StatisticsPanel();
-        new StatisticsController(service, view);
+        StatisticsPanel view = new StatisticsPanel(currentStaff.getRole());
+        new StatisticsController(service, view, currentStaff.getRole());
         switchPanel(view);
     }
 

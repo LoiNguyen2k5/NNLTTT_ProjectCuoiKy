@@ -1,6 +1,6 @@
 package com.example.cosmetic.view.supplier;
 
-import com.example.cosmetic.view.utils.UITheme;
+import com.example.cosmetic.view.components.UITheme;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -33,7 +33,7 @@ public class SupplierManagementPanel extends JPanel {
         formGrid.setOpaque(false);
 
         txtId = UITheme.createTextField(); txtId.setEditable(false);
-        txtId.setBackground(new Color(243, 244, 246));
+        txtId.setBackground(UITheme.isDark ? UITheme.DARK_FIELD_BG : new Color(243, 244, 246));
         txtName    = UITheme.createTextField();
         txtPhone   = UITheme.createTextField();
         txtAddress = UITheme.createTextField();
@@ -77,7 +77,7 @@ public class SupplierManagementPanel extends JPanel {
 
         JScrollPane scroll = new JScrollPane(table);
         scroll.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, UITheme.BORDER_COLOR));
-        scroll.getViewport().setBackground(Color.WHITE);
+        scroll.getViewport().setBackground(UITheme.getCardColor());
         tableCard.add(scroll, BorderLayout.CENTER);
 
         JPanel center = new JPanel(new BorderLayout(0, 14));

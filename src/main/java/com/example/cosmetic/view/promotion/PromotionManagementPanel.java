@@ -1,6 +1,6 @@
 package com.example.cosmetic.view.promotion;
 
-import com.example.cosmetic.view.utils.UITheme;
+import com.example.cosmetic.view.components.UITheme;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;

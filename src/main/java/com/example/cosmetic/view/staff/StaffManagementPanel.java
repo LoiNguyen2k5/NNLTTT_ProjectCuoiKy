@@ -1,6 +1,6 @@
 package com.example.cosmetic.view.staff;
 
-import com.example.cosmetic.view.utils.UITheme;
+import com.example.cosmetic.view.components.UITheme;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -93,7 +93,7 @@ public class StaffManagementPanel extends JPanel {
 
         JScrollPane scroll = new JScrollPane(tblStaff);
         scroll.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, UITheme.BORDER_COLOR));
-        scroll.getViewport().setBackground(Color.WHITE);
+        scroll.getViewport().setBackground(UITheme.getCardColor());
         tableCard.add(scroll, BorderLayout.CENTER);
 
         JPanel center = new JPanel(new BorderLayout(0, 14));

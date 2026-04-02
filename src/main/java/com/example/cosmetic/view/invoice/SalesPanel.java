@@ -2,7 +2,7 @@ package com.example.cosmetic.view.invoice;
 
 import com.example.cosmetic.model.entity.Customer;
 import com.example.cosmetic.model.entity.Product;
-import com.example.cosmetic.view.utils.UITheme;
+import com.example.cosmetic.view.components.UITheme;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;

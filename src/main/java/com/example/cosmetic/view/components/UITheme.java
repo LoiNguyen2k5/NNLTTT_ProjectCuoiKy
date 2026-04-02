@@ -1,4 +1,4 @@
-package com.example.cosmetic.view.utils;
+package com.example.cosmetic.view.components;
 
 import javax.swing.*;
 import javax.swing.border.AbstractBorder;
@@ -59,6 +59,23 @@ public class UITheme {
     // =========================================================
     // DYNAMIC COLOR GETTERS (trả về màu theo theme hiện tại)
     // =========================================================
+    // Status colors constants
+    public static final Color SUCCESS        = new Color(22,  163,  74);
+    public static final Color SUCCESS_BG     = new Color(220, 252, 231);
+    public static final Color DANGER         = new Color(220,  38,  38);
+    public static final Color DANGER_BG      = new Color(254, 226, 226);
+    public static final Color WARNING        = new Color(217, 119,   6);
+    public static final Color WARNING_BG     = new Color(254, 243, 199);
+    public static final Color INFO           = new Color(37,  99,  235);
+    public static final Color INFO_BG        = new Color(219, 234, 254);
+
+    public static Color getSuccessBg()   { return isDark ? new Color(22, 60, 36) : SUCCESS_BG; }
+    public static Color getSuccessText() { return isDark ? new Color(74, 222, 128) : SUCCESS; }
+    public static Color getWarningBg()   { return isDark ? new Color(80, 50, 10) : WARNING_BG; }
+    public static Color getWarningText() { return isDark ? new Color(250, 204, 21) : WARNING; }
+    public static Color getDangerBg()    { return isDark ? new Color(80, 20, 20) : DANGER_BG; }
+    public static Color getDangerText()  { return isDark ? new Color(248, 113, 113) : DANGER; }
+    
     public static Color getBgColor()     { return isDark ? DARK_CONTENT_BG  : CONTENT_BG; }
     public static Color getCardColor()   { return isDark ? DARK_CARD_BG     : CARD_BG; }
     public static Color getHeaderColor() { return isDark ? DARK_HEADER_BG   : HEADER_BG; }
@@ -66,16 +83,6 @@ public class UITheme {
     public static Color getTextSec()     { return isDark ? DARK_TEXT_SEC    : TEXT_SECONDARY; }
     public static Color getBorderColor() { return isDark ? DARK_BORDER      : BORDER_COLOR; }
     public static Color getFieldBg()     { return isDark ? DARK_FIELD_BG    : new Color(243, 244, 246); }
-
-    // Status colors
-    public static final Color SUCCESS        = new Color(22,  163,  74);  // Xanh lá
-    public static final Color SUCCESS_BG     = new Color(220, 252, 231);
-    public static final Color DANGER         = new Color(220,  38,  38);  // Đỏ
-    public static final Color DANGER_BG      = new Color(254, 226, 226);
-    public static final Color WARNING        = new Color(217, 119,   6);  // Cam
-    public static final Color WARNING_BG     = new Color(254, 243, 199);
-    public static final Color INFO           = new Color(37,  99,  235);  // Xanh dương
-    public static final Color INFO_BG        = new Color(219, 234, 254);
 
     public static final Color BTN_ADD        = new Color(37,  99,  235);  // + New (xanh dương)
     public static final Color BTN_EDIT       = new Color(37,  99,  235);  // Sửa
@@ -153,7 +160,7 @@ public class UITheme {
                     g2.fillRoundRect(0, 0, getWidth(), getHeight(), BTN_CORNER * 2, BTN_CORNER * 2);
                     setForeground(Color.WHITE);
                 } else {
-                    g2.setColor(Color.WHITE);
+                    g2.setColor(isDark ? getCardColor() : Color.WHITE);
                     g2.fillRoundRect(0, 0, getWidth(), getHeight(), BTN_CORNER * 2, BTN_CORNER * 2);
                     g2.setColor(borderColor);
                     g2.setStroke(new BasicStroke(1.5f));
@@ -318,10 +325,15 @@ public class UITheme {
     }
 
     public static JPasswordField createPasswordField() {
+        Color fieldBg = getFieldBg();
+        Color borderC = isDark ? DARK_BORDER : BORDER_COLOR;
+        Color textC   = isDark ? DARK_TEXT   : TEXT_PRIMARY;
         JPasswordField field = new JPasswordField();
         field.setFont(FONT_BODY);
+        field.setForeground(textC);
+        field.setBackground(isDark ? fieldBg : Color.WHITE);
         field.setBorder(BorderFactory.createCompoundBorder(
-                new RoundBorder(BORDER_COLOR, 6),
+                new RoundBorder(borderC, 6),
                 new EmptyBorder(6, 10, 6, 10)
         ));
         field.setPreferredSize(new Dimension(0, 36));
@@ -400,8 +412,8 @@ public class UITheme {
                 protected void paintComponent(Graphics g) {
                     Graphics2D g2 = (Graphics2D) g.create();
                     g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                    Color bg = isSelected ? (text.contains("Còn") ? SUCCESS.darker() : DANGER.darker())
-                                          : (text.contains("Còn") ? SUCCESS_BG : DANGER_BG);
+                    Color bg = isSelected ? (text.contains("Còn") ? getSuccessText().darker() : getDangerText().darker())
+                                          : (text.contains("Còn") ? getSuccessBg() : getDangerBg());
                     g2.setColor(bg);
                     g2.fillRoundRect(2, 4, getWidth() - 4, getHeight() - 8, 20, 20);
                     g2.dispose();
@@ -409,12 +421,15 @@ public class UITheme {
                 }
             };
             badge.setFont(new Font("Segoe UI", Font.BOLD, 11));
-            badge.setForeground(text.contains("Còn") ? SUCCESS : DANGER);
+            badge.setForeground(text.contains("Còn") ? getSuccessText() : getDangerText());
             badge.setOpaque(false);
 
             // Wrap in panel to center the badge
             JPanel wrapper = new JPanel(new GridBagLayout());
-            wrapper.setBackground(isSelected ? PRIMARY_LIGHT : (row % 2 == 0 ? Color.WHITE : new Color(249, 250, 251)));
+            Color rowEven = isDark ? DARK_CARD_BG : Color.WHITE;
+            Color rowOdd  = isDark ? DARK_ROW_ALT : new Color(249, 250, 251);
+            Color selBg   = isDark ? new Color(70, 50, 140) : PRIMARY_LIGHT;
+            wrapper.setBackground(isSelected ? selBg : (row % 2 == 0 ? rowEven : rowOdd));
             wrapper.add(badge);
             return wrapper;
         }
@@ -441,8 +456,8 @@ public class UITheme {
                     Graphics2D g2 = (Graphics2D) g.create();
                     g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                     Color bg = isSelected
-                            ? (isPos ? SUCCESS.darker() : WARNING.darker())
-                            : (isPos ? SUCCESS_BG : WARNING_BG);
+                            ? (isPos ? getSuccessText().darker() : getWarningText().darker())
+                            : (isPos ? getSuccessBg() : getWarningBg());
                     g2.setColor(bg);
                     g2.fillRoundRect(2, 4, getWidth() - 4, getHeight() - 8, 20, 20);
                     g2.dispose();
@@ -450,11 +465,14 @@ public class UITheme {
                 }
             };
             badge.setFont(new Font("Segoe UI", Font.BOLD, 11));
-            badge.setForeground(isPos ? SUCCESS : WARNING);
+            badge.setForeground(isPos ? getSuccessText() : getWarningText());
             badge.setOpaque(false);
 
             JPanel wrapper = new JPanel(new GridBagLayout());
-            wrapper.setBackground(isSelected ? PRIMARY_LIGHT : (row % 2 == 0 ? Color.WHITE : new Color(249, 250, 251)));
+            Color rowEven = isDark ? DARK_CARD_BG : Color.WHITE;
+            Color rowOdd  = isDark ? DARK_ROW_ALT : new Color(249, 250, 251);
+            Color selBg   = isDark ? new Color(70, 50, 140) : PRIMARY_LIGHT;
+            wrapper.setBackground(isSelected ? selBg : (row % 2 == 0 ? rowEven : rowOdd));
             wrapper.add(badge);
             return wrapper;
         }

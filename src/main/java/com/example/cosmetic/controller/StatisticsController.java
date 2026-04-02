@@ -1,5 +1,6 @@
 package com.example.cosmetic.controller;
 
+import com.example.cosmetic.model.enums.StaffRole;
 import com.example.cosmetic.service.StatisticsService;
 import com.example.cosmetic.view.statistics.StatisticsPanel;
 import com.example.cosmetic.view.utils.PDFExporter;
@@ -21,13 +22,24 @@ import java.util.List;
 public class StatisticsController {
     private final StatisticsService service;
     private final StatisticsPanel view;
+    private final StaffRole role;
 
-    public StatisticsController(StatisticsService service, StatisticsPanel view) {
+    public StatisticsController(StatisticsService service, StatisticsPanel view, StaffRole role) {
         this.service = service;
         this.view = view;
+        this.role = role;
         
         view.getBtnRefresh().addActionListener(e -> loadData());
-        view.getBtnExportPDF().addActionListener(e -> exportReportPDF()); // Gắn sự kiện xuất PDF
+        // Chi an nut neu la STAFF, nhung bao ve them o tang controller
+        view.getBtnExportPDF().addActionListener(e -> {
+            if (role == StaffRole.STAFF) {
+                JOptionPane.showMessageDialog(view,
+                        "Bạn không có quyền xuất báo cáo PDF.",
+                        "Không có quyền", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+            exportReportPDF();
+        });
         loadData();
     }
 
@@ -76,6 +88,19 @@ public class StatisticsController {
                     "DOANH THU THEO SẢN PHẨM", "Sản Phẩm", "Doanh Thu (VND)", 
                     dataset, PlotOrientation.VERTICAL, false, true, false
             );
+            
+            // Cấu hình màu biểu đồ dựa trên Theme
+            barChart.setBackgroundPaint(com.example.cosmetic.view.components.UITheme.getCardColor());
+            org.jfree.chart.plot.CategoryPlot plot = barChart.getCategoryPlot();
+            plot.setBackgroundPaint(com.example.cosmetic.view.components.UITheme.getBgColor());
+            barChart.getTitle().setPaint(com.example.cosmetic.view.components.UITheme.getTextColor());
+            plot.getDomainAxis().setTickLabelPaint(com.example.cosmetic.view.components.UITheme.getTextColor());
+            plot.getDomainAxis().setLabelPaint(com.example.cosmetic.view.components.UITheme.getTextColor());
+            plot.getRangeAxis().setTickLabelPaint(com.example.cosmetic.view.components.UITheme.getTextColor());
+            plot.getRangeAxis().setLabelPaint(com.example.cosmetic.view.components.UITheme.getTextColor());
+            plot.setDomainGridlinePaint(com.example.cosmetic.view.components.UITheme.getBorderColor());
+            plot.setRangeGridlinePaint(com.example.cosmetic.view.components.UITheme.getBorderColor());
+
             ChartPanel chartPanel = new ChartPanel(barChart);
             view.getPnlChart().removeAll(); 
             view.getPnlChart().add(chartPanel, BorderLayout.CENTER);

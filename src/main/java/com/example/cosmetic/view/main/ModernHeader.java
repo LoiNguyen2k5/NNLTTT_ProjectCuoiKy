@@ -1,7 +1,7 @@
 package com.example.cosmetic.view.main;
 
 import com.example.cosmetic.model.entity.Staff;
-import com.example.cosmetic.view.utils.UITheme;
+import com.example.cosmetic.view.components.UITheme;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
