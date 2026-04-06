@@ -145,8 +145,10 @@ public class ModernSidebar extends JPanel {
         addSubMenuItem(subMenuDanhMuc, "Mã Khuyến Mãi", "PROMOTION");
         panel.add(subMenuDanhMuc);
 
-        addSeparatorLabel(panel, "BÁO CÁO");
-        addMenuItem(panel, "📊", "Thống Kê", "STATISTICS");
+        if (staffRole == StaffRole.ADMIN) {
+            addSeparatorLabel(panel, "BÁO CÁO");
+            addMenuItem(panel, "📊", "Thống Kê", "STATISTICS");
+        }
 
         // Admin-only
         if (staffRole == StaffRole.ADMIN) {

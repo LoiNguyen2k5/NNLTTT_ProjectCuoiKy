@@ -3,6 +3,26 @@ package com.example.cosmetic.view.utils;
 import java.io.File;
 
 public class DatabaseBackupUtil {
+
+    private static String getMysqlDumpPath() {
+        String[] commonPaths = {
+            "C:\\Program Files\\MySQL\\MySQL Server 8.0\\bin\\mysqldump.exe",
+            "C:\\Program Files\\MySQL\\MySQL Workbench 8.0\\mysqldump.exe",
+            "C:\\Program Files\\MySQL\\MySQL Workbench 8.0 CE\\mysqldump.exe",
+            "C:\\Program Files\\MySQL\\MySQL Server 8.1\\bin\\mysqldump.exe",
+            "C:\\Program Files\\MySQL\\MySQL Server 8.2\\bin\\mysqldump.exe",
+            "C:\\Program Files\\MySQL\\MySQL Server 8.3\\bin\\mysqldump.exe",
+            "C:\\Program Files\\MySQL\\MySQL Server 8.4\\bin\\mysqldump.exe",
+            "C:\\Program Files\\MySQL\\MySQL Server 5.7\\bin\\mysqldump.exe",
+            "C:\\xampp\\mysql\\bin\\mysqldump.exe"
+        };
+        for (String path : commonPaths) {
+            if (new File(path).exists()) {
+                return path;
+            }
+        }
+        return "mysqldump"; // fallback to PATH
+    }
     
     /**
      * Hàm thực thi lệnh mysqldump để sao lưu database
@@ -15,15 +35,29 @@ public class DatabaseBackupUtil {
     public static boolean backup(String dbUser, String dbPass, String dbName, String savePath) {
         try {
             ProcessBuilder pb;
+            String dumpPath = getMysqlDumpPath();
+            
             // Xây dựng câu lệnh chạy mysqldump
             if (dbPass == null || dbPass.trim().isEmpty()) {
-                pb = new ProcessBuilder("mysqldump", "-u", dbUser, dbName, "-r", savePath);
+                pb = new ProcessBuilder(dumpPath, "-u", dbUser, dbName, "-r", savePath);
             } else {
-                pb = new ProcessBuilder("mysqldump", "-u", dbUser, "-p" + dbPass, dbName, "-r", savePath);
+                pb = new ProcessBuilder(dumpPath, "-u", dbUser, "-p" + dbPass, dbName, "-r", savePath);
             }
 
+            // Gộp luồng lỗi vào output để xử lý chung
+            pb.redirectErrorStream(true);
+            
             // Thực thi lệnh ẩn dưới background
             Process process = pb.start();
+            
+            // Phải đọc output để tránh bị treo (deadlock) nếu mysqldump sinh ra quá nhiều log
+            try (java.io.BufferedReader reader = new java.io.BufferedReader(new java.io.InputStreamReader(process.getInputStream()))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    // Có thể log ra console
+                    System.out.println("mysqldump: " + line);
+                }
+            }
             
             // Chờ lệnh chạy xong
             int processComplete = process.waitFor();

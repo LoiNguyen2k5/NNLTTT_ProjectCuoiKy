@@ -280,6 +280,12 @@ public class MainFrame extends JFrame {
         if (pwResult != JOptionPane.OK_OPTION) return;
         String dbPass = new String(pwField.getPassword());
 
+        // Tạo dialog dạng chờ (không có nút bấm để chặn tương tác)
+        JDialog waitDialog = new JOptionPane("⏳ Đang thực hiện backup, vui lòng chờ...",
+                JOptionPane.INFORMATION_MESSAGE, JOptionPane.DEFAULT_OPTION, null, new Object[]{}, null)
+                .createDialog(this, "Backup Database");
+        waitDialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
+
         // Thuc hien backup tren thread rieng
         SwingWorker<Boolean, Void> worker = new SwingWorker<>() {
             @Override
@@ -288,6 +294,8 @@ public class MainFrame extends JFrame {
             }
             @Override
             protected void done() {
+                // Đóng hộp thoại chờ khi chạy xong
+                waitDialog.dispose();
                 try {
                     boolean ok = get();
                     if (ok) {
@@ -308,9 +316,8 @@ public class MainFrame extends JFrame {
             }
         };
 
-        JOptionPane.showMessageDialog(this,
-                "⏳ Đang thực hiện backup, vui lòng chờ...",
-                "Backup Database", JOptionPane.INFORMATION_MESSAGE);
+        // Phải execute worker TRƯỚC khi setVisible dialog (vì setVisible(true) trên modal JDialog sẽ chặn luồng EDT)
         worker.execute();
+        waitDialog.setVisible(true);
     }
 }
